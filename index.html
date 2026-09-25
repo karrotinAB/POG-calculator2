@@ -60,6 +60,11 @@ header{height:56px;background:var(--o);color:#fff;display:flex;align-items:cente
 .baylbl{position:absolute;font-size:12px;color:#888;font-weight:700;white-space:nowrap}
 .prop{position:absolute;height:4px;background:#8A9099;border-radius:2px;z-index:1}
 .prop.pipe{height:3px;background:repeating-linear-gradient(90deg,var(--o) 0 6px,transparent 6px 10px)}
+.prop{cursor:pointer}
+.prop::before{content:'';position:absolute;left:0;right:0;top:-5px;bottom:-5px}
+.prop:hover,.prop.on{box-shadow:0 0 0 2px var(--purple)}
+.ptag{position:absolute;right:0;top:5px;font-size:9px;font-weight:700;line-height:12px;padding:0 4px;border-radius:6px;background:var(--purple);color:#fff;white-space:nowrap;pointer-events:none}
+.ptag:empty{display:none}
 .memo{position:absolute;background:#FFF8C5;border:1px solid #E8D870;font-size:10px;padding:2px;overflow:hidden;color:#6b5d00;z-index:1}
 .it{position:absolute;cursor:pointer;background:#FAFAFA;outline:1px solid rgba(0,0,0,.08)}
 .it img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:fill;pointer-events:none}
@@ -71,6 +76,8 @@ header{height:56px;background:var(--o);color:#fff;display:flex;align-items:cente
 .it.ex .q{background:#777}
 .it.hit{outline:2px solid var(--purple)}
 .it.dim{opacity:.22}
+.it.out{outline:2px dashed var(--red);opacity:.45}
+.it.out.sel{opacity:1}
 .it.sel{outline:2px solid var(--o);box-shadow:0 0 0 3px rgba(244,123,32,.4);z-index:999!important;opacity:1}
 .marquee{position:absolute;border:1px dashed var(--o2);background:rgba(244,123,32,.12);pointer-events:none;display:none;z-index:1000}
 .canvas-msg{padding:60px;text-align:center;color:var(--g5);font-size:14px;line-height:1.8}
@@ -141,6 +148,46 @@ table.kv td:first-child{color:var(--g5);width:78px;white-space:nowrap}
 .stat{background:var(--g1);border-radius:8px;padding:10px}
 .stat b{display:block;font-size:20px;color:var(--o)}
 .stat span{font-size:11px;color:var(--g5)}
+.vtabs{display:flex;background:rgba(0,0,0,.15);border-radius:7px;padding:2px}
+.vtab{border:none;background:none;color:#fff;font-size:12px;font-weight:700;padding:5px 10px;border-radius:5px;white-space:nowrap}
+.vtab.on{background:#fff;color:var(--o2)}
+.layout.tbl{grid-template-columns:1fr 330px}
+.layout.tbl .side,.layout.tbl .main{display:none}
+.tview{display:none;flex-direction:column;min-width:0;min-height:0;background:#fff}
+.layout.tbl .tview{display:flex}
+.tvbar{border-bottom:1px solid var(--g2);padding:8px 12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--g7)}
+.tvbar select{border:1px solid var(--g2);border-radius:5px;padding:4px 6px;font-size:12px;max-width:220px}
+.seg{display:flex;border:1px solid var(--g2);border-radius:6px;overflow:hidden}
+.seg button{border:none;background:#fff;padding:5px 12px;font-size:12px;font-weight:700;color:var(--g7)}
+.seg button+button{border-left:1px solid var(--g2)}
+.seg button.on{background:var(--o);color:#fff}
+.tvcnt{margin-left:auto;color:var(--g5)}
+.tscroll{flex:1;overflow:auto;min-height:0}
+table.xt{border-collapse:separate;border-spacing:0;font-size:12px;min-width:100%}
+table.xt th{position:sticky;top:0;z-index:2;background:#F7F7F7;border-bottom:1px solid #D5D5D5;border-right:1px solid var(--g2);padding:6px 8px;text-align:left;font-weight:700;color:var(--g7);white-space:nowrap;cursor:pointer;user-select:none}
+table.xt th:hover{background:var(--ol)}
+table.xt th.sorted{color:var(--o2)}
+table.xt td{border-bottom:1px solid var(--g2);border-right:1px solid var(--g1);padding:4px 8px;white-space:nowrap;max-width:320px;overflow:hidden;text-overflow:ellipsis}
+table.xt td.n{text-align:right;font-variant-numeric:tabular-nums}
+table.xt td.rn{color:var(--g4);background:#FAFAFA;text-align:right;font-size:11px}
+table.xt tbody tr{cursor:pointer}
+table.xt tbody tr:hover td{background:#FFF8F1}
+table.xt tbody tr.on td{background:var(--ol)}
+table.xt tr.ex td{color:var(--g4)}
+table.xt td img{width:24px;height:24px;object-fit:contain;vertical-align:middle;background:var(--g1);border-radius:3px}
+table.xt input.tq{width:56px;border:1px solid var(--g2);border-radius:4px;padding:2px 4px;text-align:right;font-size:12px;font-weight:700}
+table.xt tr.ed input.tq{color:var(--blue);border-color:var(--blue)}
+table.xt .unk{color:var(--red);font-weight:700}
+.loc{padding:7px 8px;border-bottom:1px solid var(--g1);display:flex;gap:8px;align-items:center;cursor:pointer}
+.loc:hover{background:var(--g1)}
+.loc .nm{flex:1;min-width:0;font-size:12px}
+.loc .ct{font-size:11px;color:var(--g5)}
+.loc b{font-size:13px}
+.cust-row{display:flex;gap:6px;align-items:center;margin-top:6px}
+.cust-row input{border:1px solid var(--g2);border-radius:6px;padding:7px 8px}
+.cust-row .cn{flex:1;min-width:0}
+.cust-row .cd2{width:90px}
+.shdr{font-size:13px;font-weight:800;margin:18px 0 4px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#222;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;z-index:6000;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.show{opacity:1}
 </style>
@@ -152,6 +199,7 @@ table.kv td:first-child{color:var(--g5);width:78px;white-space:nowrap}
     <div class="logo">초도리스트 POG 편집기</div>
     <div class="hsub" id="hsub">Artbox Global</div>
   </div>
+  <div class="vtabs" id="vtabs"><button class="vtab" data-view="pog">POG 보기</button><button class="vtab" data-view="table">표 보기</button></div>
   <div class="hstats" id="hstats"></div>
   <input class="search" id="search" placeholder="상품코드 / 상품명 검색">
   <span class="save-status" id="save-status"></span>
@@ -169,6 +217,7 @@ table.kv td:first-child{color:var(--g5);width:78px;white-space:nowrap}
       <div class="stage" id="stage"><div class="inner" id="inner"></div></div>
     </div>
   </section>
+  <section class="tview" id="tview"></section>
   <aside class="panel" id="panel"></aside>
 </div>
 
@@ -199,10 +248,14 @@ table.kv td:first-child{color:var(--g5);width:78px;white-space:nowrap}
 
 <!-- 설정 -->
 <div class="modal-bg" id="m-settings">
-  <div class="modal">
+  <div class="modal" style="width:min(700px,94vw)">
     <div class="mh"><h2>추천 수량 계산 설정</h2><button class="mx" data-close="m-settings">×</button></div>
     <div class="mb">
       <div class="sgrid" id="set-grid"></div>
+      <div class="shdr">고리 · 진열방식 추가</div>
+      <div class="muted">매대마다 고리 길이가 다르면 여기서 종류를 추가하세요. 예: 스페이스월 고리 120mm, 타공판 고리 200mm. 추가한 종류는 매대 · 선반/고리 · 칸 진열방식 목록에 모두 나와요.</div>
+      <div id="cust-list"></div>
+      <button class="sbtn" id="cust-add" style="margin-top:8px">+ 종류 추가</button>
       <div class="infobox">추천 수량 = 진열깊이 ÷ 상품 뎁스 → 팩킹수량 단위로 올림 → 상한 적용 (팩킹수량이 상한보다 크면 팩킹수량이 상한)<br>직접 바꾼 수량은 설정을 바꿔도 그대로 유지돼요.</div>
     </div>
     <div class="mf"><button class="sbtn gray" id="set-reset">기본값</button><button class="sbtn fill" id="set-save">저장</button></div>
@@ -295,7 +348,19 @@ async function pogCollector(APP) {
     var memos = [].map.call(d.querySelectorAll('[id^="memo"]'), function (e) {
       return { text: T(e.textContent), x: px(e.style.left), y: px(e.style.top), w: px(e.style.width), h: px(e.style.height) };
     }).filter(function (m) { return m.text; });
-    return { title: d.title, mdidx: gv(d, 'gv-mdidx'), mdtype: gv(d, 'gv-mdtype'), mdcnt: mdcnt, bays: bays, items: items, props: props, memos: memos };
+    var bodies = [];
+    try {
+      var ref = d.querySelector('div.item01') || d.querySelector('div[id^="prop"]');
+      if (ref) {
+        var rr = ref.getBoundingClientRect();
+        var dx = rr.left - (parseFloat(ref.style.left) || 0), dy = rr.top - (parseFloat(ref.style.top) || 0);
+        bodies = [].map.call(d.querySelectorAll('[id^="md-body"]'), function (b) {
+          var r = b.getBoundingClientRect();
+          return { id: b.id, left: px(r.left - dx), top: px(r.top - dy), w: px(r.width), h: px(r.height) };
+        }).filter(function (b) { return b.w > 0 && b.h > 0; });
+      }
+    } catch (e) {}
+    return { title: d.title, mdidx: gv(d, 'gv-mdidx'), mdtype: gv(d, 'gv-mdtype'), mdcnt: mdcnt, bays: bays, bodies: bodies, items: items, props: props, memos: memos };
   }
 
   function listMds() {
@@ -452,7 +517,7 @@ async function pogCollector(APP) {
 /* =====================================================================
    2) 편집 앱
    ===================================================================== */
-var TYPES = [
+var BASE_TYPES = [
   { id: 'shelf', label: '선반' },
   { id: 'hook', label: '파이프/고리' },
   { id: 'space_wall', label: '스페이스월' },
@@ -462,12 +527,20 @@ var TYPES = [
   { id: 'file_holder', label: '화일집기 (고정수량)' },
   { id: 'none', label: '제외 (0개)' }
 ];
-var TYPE_LABEL = {};
-TYPES.forEach(function (t) { TYPE_LABEL[t.id] = t.label; });
 var DEPTH_TYPES = ['shelf', 'hook', 'space_wall', 'hook_board', 'angle_shelf'];
-var DEF_SET = { depth: { shelf: 250, hook: 185, space_wall: 85, hook_board: 85, angle_shelf: 40 }, cap: 20, cardDefault: 1, fileQty: 3 };
+var DEF_SET = { depth: { shelf: 250, hook: 185, space_wall: 85, hook_board: 85, angle_shelf: 40 }, cap: 20, cardDefault: 1, fileQty: 3, custom: [] };
 
 var SET = loadSettings();
+var TYPES = [], TYPE_LABEL = {};
+// 사용자가 추가한 고리·진열방식은 기본 고리 종류 바로 뒤에 끼워 넣음
+function rebuildTypes() {
+  var i = BASE_TYPES.findIndex(function (t) { return t.id === 'hook_board'; }) + 1;
+  TYPES = BASE_TYPES.slice(0, i).concat(SET.custom.map(function (c) { return { id: c.id, label: c.label, custom: true }; }), BASE_TYPES.slice(i));
+  TYPE_LABEL = {};
+  TYPES.forEach(function (t) { TYPE_LABEL[t.id] = t.label; });
+}
+function validType(t) { return !!(t && TYPE_LABEL[t]); }
+rebuildTypes();
 var P = null;
 var cur = 0;
 var sel = new Set();
@@ -490,7 +563,7 @@ function toast(msg) { var t = $('toast'); t.textContent = msg; t.classList.add('
 function loadSettings() {
   try {
     var s = JSON.parse(localStorage.getItem('pogfl:settings'));
-    if (s && s.depth) return { depth: Object.assign({}, DEF_SET.depth, s.depth), cap: s.cap || 20, cardDefault: s.cardDefault || 1, fileQty: s.fileQty || 3 };
+    if (s && s.depth) return { depth: Object.assign({}, DEF_SET.depth, s.depth), cap: s.cap || 20, cardDefault: s.cardDefault || 1, fileQty: s.fileQty || 3, custom: Array.isArray(s.custom) ? s.custom : [] };
   } catch (e) {}
   var out = JSON.parse(JSON.stringify(DEF_SET));
   try {
@@ -534,7 +607,7 @@ function normalizePayload(d) {
     return {
       mdidx: String(m.mdidx || det.mdidx || ''), name: m.mdname || det.title || '', team: m.team || '', note: m.note || '',
       mdtype: det.mdtype || String(m.mdtype || 'A').charAt(0) || 'A', error: det.error || '',
-      bays: det.bays || [], props: det.props || [], memos: det.memos || [],
+      bays: det.bays || [], bodies: det.bodies || [], props: det.props || [], memos: det.memos || [],
       items: (det.items || []).map(function (it) {
         return { o: String(it.objidx), code: it.code, name: it.name, price: it.price, group: it.group, gd: it.dims ? it.dims.d : null, img: it.image, x: it.x, y: it.y, w: it.w, h: it.h, z: it.z };
       })
@@ -576,7 +649,7 @@ function ingest(d, msgPrefix) {
   var code = n.store.code || 'unknown';
   if (P && P.store.code === code && P.collectedAt === n.collectedAt) return false;
   var prev = (P && P.store.code === code) ? P : readProject(code);
-  P = { store: n.store, collectedAt: n.collectedAt, mds: n.mds, products: n.products, edits: prev ? prev.edits || {} : {}, mdTypes: prev ? prev.mdTypes || {} : {}, done: prev ? prev.done || {} : {} };
+  P = { store: n.store, collectedAt: n.collectedAt, mds: n.mds, products: n.products, edits: prev ? prev.edits || {} : {}, mdTypes: prev ? prev.mdTypes || {} : {}, propTypes: prev ? prev.propTypes || {} : {}, done: prev ? prev.done || {} : {} };
   var kept = Object.keys(P.edits).length;
   afterLoad();
   toast((msgPrefix || '') + (n.store.name || code) + ' — 매대 ' + n.mds.length + '개, 상품 ' + Object.keys(n.products).length + '종' + (kept ? ' (이전 수정 ' + kept + '건 유지)' : ''));
@@ -585,20 +658,39 @@ function ingest(d, msgPrefix) {
 function importProject(obj) {
   var p = obj.project;
   if (!p || !p.mds) { alert('올바른 진행상황 파일이 아니에요.'); return; }
+  // 다른 PC에서 추가한 고리 종류도 함께 가져옴 (이미 있는 건 그대로)
+  var added = 0;
+  ((obj.settings && obj.settings.custom) || []).forEach(function (c) {
+    if (!c || !c.id || SET.custom.some(function (x) { return x.id === c.id; })) return;
+    SET.custom.push({ id: c.id, label: c.label });
+    if (obj.settings.depth && obj.settings.depth[c.id]) SET.depth[c.id] = obj.settings.depth[c.id];
+    added++;
+  });
+  if (added) { saveSettings(); rebuildTypes(); }
   var code = p.store.code;
   var existing = (P && P.store.code === code) ? P : readProject(code);
   if (existing) {
     var newer = (p.collectedAt || '') >= (existing.collectedAt || '') ? p : existing;
     P = { store: newer.store, collectedAt: newer.collectedAt, mds: newer.mds, products: newer.products,
-      edits: Object.assign({}, existing.edits, p.edits), mdTypes: Object.assign({}, existing.mdTypes, p.mdTypes), done: Object.assign({}, existing.done, p.done) };
+      edits: Object.assign({}, existing.edits, p.edits), mdTypes: Object.assign({}, existing.mdTypes, p.mdTypes), propTypes: Object.assign({}, existing.propTypes, p.propTypes), done: Object.assign({}, existing.done, p.done) };
   } else {
-    P = p; P.edits = P.edits || {}; P.mdTypes = P.mdTypes || {}; P.done = P.done || {};
+    P = p;
   }
   afterLoad();
   toast('진행상황을 불러왔어요 (수정 ' + Object.keys(P.edits).length + '건)');
 }
 function afterLoad() {
   LAYOUT = {}; ITEM_INDEX = {}; CODE_INDEX = {};
+  P.edits = P.edits || {}; P.mdTypes = P.mdTypes || {}; P.propTypes = P.propTypes || {}; P.done = P.done || {};
+  // 매대 영역 밖 상품은 완전히 제외 (화면·수량·엑셀 모두)
+  P.mds.forEach(function (md) {
+    if (!md.items.length) return;
+    var L0 = layoutOf(md);
+    var keep = md.items.filter(function (it) { return !(L0.info[it.o] && L0.info[it.o].out); });
+    md.outRemoved = (md.outRemoved || 0) + (md.items.length - keep.length);
+    md.items = keep;
+  });
+  LAYOUT = {};
   P.mds.forEach(function (md) {
     md.items.forEach(function (it) {
       ITEM_INDEX[it.o] = { md: md, it: it };
@@ -626,15 +718,51 @@ function readFile(file) {
 }
 
 /* ---------- 좌표 해석: 연 / 단 / 선반·파이프 ---------- */
+function buildBays(md) {
+  var inp = md.bays && md.bays.length ? md.bays : [{ no: 1, left: 0, top: 0, w: 400, h: 750 }];
+  var mm = {};
+  inp.forEach(function (b) { mm[b.no] = b; });
+  if (md.bodies && md.bodies.length) {
+    var NO = { '': 1, two: 2, three: 3, four: 4 };
+    return md.bodies.map(function (b, i) {
+      var m = b.id.replace(/^md-body-?/, '').match(/^(two|three|four)?-?(copy)?$/) || [];
+      var no = NO[m[1] || ''] || i + 1;
+      var copy = !!m[2];
+      var src = mm[no] || {};
+      return { no: copy ? no + 10 : no, label: no + '연' + (copy ? ' (복사면)' : ''), left: b.left, top: b.top, w: b.w, h: b.h, wmm: src.wmm, hmm: src.hmm };
+    });
+  }
+  return inp.map(function (b) { return Object.assign({}, b, { label: b.no + '연' }); });
+}
 function layoutOf(md) {
   if (LAYOUT[md.mdidx]) return LAYOUT[md.mdidx];
-  var bays = md.bays && md.bays.length ? md.bays : [{ no: 1, left: 0, top: 0, w: 400, h: 750 }];
-  var props = md.props.map(function (p) { return Object.assign({}, p, { h: p.h || 4 }); });
+  var bays = buildBays(md);
+  var seenKey = {};
+  var props = md.props.map(function (p, i) {
+    var key = p.objidx ? String(p.objidx) : '#' + i;
+    if (seenKey[key]) key += '#' + i;
+    seenKey[key] = 1;
+    return Object.assign({}, p, { h: p.h || 4, key: key });
+  });
+  bays.forEach(function (b) {
+    props.filter(function (p) { var pc = p.x + p.w / 2; return pc >= b.left && pc < b.left + b.w; })
+      .sort(function (a, c) { return a.y - c.y; })
+      .forEach(function (p, i) { p.bayLabel = b.label; p.tier = i + 1; });
+  });
+  var PROP_BY = {};
+  props.forEach(function (p) { PROP_BY[p.key] = p; });
   var info = {};
   md.items.forEach(function (it) {
     var cx = it.x + it.w / 2, top = it.y, bot = it.y + it.h;
-    var bay = bays[0].no;
-    bays.forEach(function (b) { if (cx >= b.left && cx < b.left + b.w) bay = b.no; });
+    // POG 사이트 엑셀 다운로드와 같은 기준: 가로는 1px 이상 겹치고, 세로는 겹치거나 맞닿으면 매대 안
+    var hit = bays.filter(function (b) {
+      var xo = it.x + it.w > b.left && it.x < b.left + b.w;
+      var yo = !(bot <= b.top || top >= b.top + b.h) || Math.abs(bot - b.top) <= 1 || Math.abs(top - (b.top + b.h)) <= 1;
+      return xo && yo;
+    });
+    if (!hit.length) { info[it.o] = { bay: 99, bayLabel: '매대 밖', kind: '매대 밖', tier: null, out: true }; return; }
+    var bayObj = hit.find(function (b) { return cx >= b.left && cx < b.left + b.w; }) || hit[0];
+    var bay = bayObj.no;
     var best = null, bd = 1e9;
     props.forEach(function (p) {
       if (cx < p.x - 2 || cx > p.x + p.w + 2) return;
@@ -647,12 +775,12 @@ function layoutOf(md) {
     var ok = best && bd <= 40;
     var tier = null;
     if (ok) {
-      var bb = bays.find(function (b) { return b.no === bay; }) || bays[0];
+      var bb = bayObj;
       var list = props.filter(function (p) { var pc = p.x + p.w / 2; return pc >= bb.left && pc < bb.left + bb.w; }).sort(function (a, b) { return a.y - b.y; });
       var ix = list.indexOf(best);
       tier = ix >= 0 ? ix + 1 : null;
     }
-    info[it.o] = { bay: bay, kind: ok ? best.kind : '미확인', tier: tier };
+    info[it.o] = { bay: bay, bayLabel: bayObj.label, kind: ok ? best.kind : '미확인', tier: tier, prop: ok ? best.key : null };
   });
   var xs = [], ys = [];
   bays.forEach(function (b) { xs.push(b.left, b.left + b.w); ys.push(b.top, b.top + b.h); });
@@ -661,7 +789,7 @@ function layoutOf(md) {
   var PAD = 24;
   var ox = Math.min.apply(null, xs) - PAD, oy = Math.min.apply(null, ys) - PAD - 22;
   var W = Math.max.apply(null, xs) - ox + PAD, H = Math.max.apply(null, ys) - oy + PAD;
-  var L = { bays: bays, props: props, info: info, ox: ox, oy: oy, W: W, H: H };
+  var L = { bays: bays, props: props, propBy: PROP_BY, info: info, ox: ox, oy: oy, W: W, H: H };
   LAYOUT[md.mdidx] = L;
   return L;
 }
@@ -670,17 +798,48 @@ function layoutOf(md) {
 function prodOf(it) { return (P.products && P.products[it.code]) || {}; }
 function depthOf(it) { var p = prodOf(it); return p.d || it.gd || null; }
 function autoType(md, it) {
+  var inf0 = layoutOf(md).info[it.o];
+  if (inf0 && inf0.out) return 'none';
   if (md.mdtype === 'B' || md.mdtype === 'D') return 'hook_board';
   var inf = layoutOf(md).info[it.o];
   return inf && inf.kind === '파이프' ? 'hook' : 'shelf';
 }
-function baseType(md, it) { var mt = P.mdTypes[md.mdidx]; return mt && mt !== 'auto' ? mt : autoType(md, it); }
-function typeOf(md, it) { var e = P.edits[it.o]; return e && e.type ? e.type : baseType(md, it); }
+// 매대 설정: { shelf: 선반·미확인 칸, pipe: 고리(파이프) 칸 } — 예전 버전은 문자열 하나로 저장됨
+function mdRule(md) {
+  var r = P.mdTypes[md.mdidx];
+  if (typeof r === 'string') return r === 'auto' ? {} : { shelf: r, pipe: r };
+  return r || {};
+}
+function setMdRule(md, slot, t) {
+  var r = Object.assign({}, mdRule(md));
+  if (t && t !== 'auto') r[slot] = t; else delete r[slot];
+  if (Object.keys(r).length) P.mdTypes[md.mdidx] = r; else delete P.mdTypes[md.mdidx];
+}
+function pkey2(md, pk) { return md.mdidx + '|' + pk; }
+function propType(md, pk) { var t = pk ? P.propTypes[pkey2(md, pk)] : null; return validType(t) ? t : null; }
+// 선반/고리 설정이 없을 때 따르는 값 (매대 설정 → 자동)
+function mdLevelType(md, it) {
+  var inf = layoutOf(md).info[it.o];
+  var t = mdRule(md)[inf && inf.kind === '파이프' ? 'pipe' : 'shelf'];
+  return validType(t) ? t : autoType(md, it);
+}
+// 칸 설정이 없을 때 따르는 값 (선반/고리 설정 → 매대 설정 → 자동)
+function baseType(md, it) {
+  var inf = layoutOf(md).info[it.o];
+  if (inf && inf.out) return 'none';
+  return propType(md, inf && inf.prop) || mdLevelType(md, it);
+}
+function typeOf(md, it) { var e = P.edits[it.o]; return e && validType(e.type) ? e.type : baseType(md, it); }
+function propName(md, pk) {
+  var p = layoutOf(md).propBy[pk];
+  if (!p) return '';
+  return (p.bayLabel ? p.bayLabel + ' ' : '') + (p.tier ? p.tier + '단 ' : '') + (p.kind === '파이프' ? '고리(파이프)' : '선반');
+}
 function calc(type, depth, pack) {
   pack = pack || 0;
   var cap = pack > SET.cap ? pack : SET.cap;
   var short = (TYPE_LABEL[type] || '').replace(/\s*\(.*\)/, '');
-  if (type === 'none') return { qty: 0, expl: '제외된 칸' };
+  if (type === 'none') return { qty: 0, expl: '제외된 칸 (매대 밖 상품은 자동 제외 — 포함하려면 진열방식을 바꾸세요)' };
   if (type === 'card_shelf') { var q1 = Math.min(pack > 0 ? pack : SET.cardDefault, cap); return { qty: q1, expl: '카드선반: ' + (pack > 0 ? '팩킹수량 ' + pack : '기본값 ' + SET.cardDefault) + '개' }; }
   if (type === 'file_holder') { var q2 = Math.min(SET.fileQty, cap); return { qty: q2, expl: '화일집기: 고정 ' + q2 + '개' }; }
   var fd = SET.depth[type] || 0;
@@ -695,14 +854,16 @@ function calc(type, depth, pack) {
 }
 function recOf(md, it) { return calc(typeOf(md, it), depthOf(it), prodOf(it).pack || 0); }
 function qtyOf(md, it) { var e = P.edits[it.o]; if (e && e.qty != null) return e.qty; return recOf(md, it).qty; }
-function isEdited(o) { var e = P.edits[o]; return !!(e && (e.qty != null || e.type)); }
+function isEdited(o) { var e = P.edits[o]; return !!(e && (e.qty != null || validType(e.type))); }
 function matches(it) {
   if (!searchQ) return false;
   return (it.code || '').toLowerCase().indexOf(searchQ) >= 0 || ((prodOf(it).name || it.name || '')).toLowerCase().indexOf(searchQ) >= 0;
 }
 function mdStats(md) {
-  var s = { n: md.items.length, nc: 0, ed: 0, tot: 0, hit: 0 };
+  var s = { n: md.items.length, nc: 0, ed: 0, tot: 0, hit: 0, out: 0 };
+  var LL = layoutOf(md);
   md.items.forEach(function (it) {
+    if (LL.info[it.o] && LL.info[it.o].out) s.out++;
     var q = qtyOf(md, it);
     if (q == null) s.nc++; else s.tot += q;
     if (isEdited(it.o)) s.ed++;
@@ -716,7 +877,11 @@ function renderAll() {
   var has = !!P;
   document.querySelector('.layout').style.visibility = has ? 'visible' : 'hidden';
   if (!has) { openSetup(true); return; }
-  renderHeader(); renderSidebar(); renderCanvas(); renderPanel();
+  document.querySelector('.layout').classList.toggle('tbl', VIEW === 'table');
+  document.querySelectorAll('.vtab').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-view') === VIEW); });
+  renderHeader();
+  if (VIEW === 'table') { renderTable(); renderPanel(); return; }
+  renderSidebar(); renderCanvas(); renderPanel();
 }
 function renderHeader() {
   var n = 0, tot = 0, nc = 0, ed = 0;
@@ -733,20 +898,26 @@ function renderSidebar() {
       '<span class="tag">' + s.n + '칸</span><span class="tag green">' + fmt(s.tot) + '개</span>' +
       (s.nc ? '<span class="tag red">미정 ' + s.nc + '</span>' : '') +
       (s.ed ? '<span class="tag blue">수정 ' + s.ed + '</span>' : '') +
+      (md.outRemoved ? '<span class="tag" title="매대 영역 밖에 놓인 상품은 자동으로 뺐어요">매대 밖 ' + md.outRemoved + '개 제외</span>' : '') +
       (searchQ && s.hit ? '<span class="tag purple">검색 ' + s.hit + '</span>' : '');
     return '<div class="mdrow' + (i === cur ? ' cur' : '') + '" data-i="' + i + '"><div class="mdn">' + (P.done[md.mdidx] ? '✅ ' : '') + esc(md.name) + '</div><div class="mdt">' + esc(md.team) + ' · #' + esc(md.mdidx) + (md.note ? ' · ' + esc(md.note) : '') + '</div><div class="mdb">' + tags + '</div></div>';
   }).join('');
 }
 function renderToolbar(md) {
-  var mt = P.mdTypes[md.mdidx] || 'auto';
-  var opts = '<option value="auto">자동 (' + (md.mdtype === 'B' || md.mdtype === 'D' ? '타공판' : '좌표로 선반/파이프 판별') + ')</option>' + TYPES.map(function (t) { return '<option value="' + t.id + '"' + (mt === t.id ? ' selected' : '') + '>' + t.label + '</option>'; }).join('');
+  var rule = mdRule(md), board = md.mdtype === 'B' || md.mdtype === 'D';
+  var opts = function (slot, autoLabel) {
+    var v = validType(rule[slot]) ? rule[slot] : 'auto';
+    return '<option value="auto">자동 (' + autoLabel + ')</option>' + TYPES.map(function (t) { return '<option value="' + t.id + '"' + (v === t.id ? ' selected' : '') + '>' + esc(t.label) + '</option>'; }).join('');
+  };
+  var nProp = Object.keys(P.propTypes).filter(function (k) { return k.indexOf(md.mdidx + '|') === 0 && validType(P.propTypes[k]); }).length;
   toolbar.innerHTML =
     '<div><div class="tb-title">' + esc(md.name) + '</div><div class="tb-sub">' + esc(md.team) + ' · #' + esc(md.mdidx) + ' · 타입 ' + esc(md.mdtype) + '</div></div>' +
-    '<div class="tb-group">매대 진열방식 <select id="md-type">' + opts + '</select></div>' +
+    '<div class="tb-group" title="이 매대의 선반 칸 기본 진열방식">매대 선반 <select id="md-type-shelf">' + opts('shelf', board ? TYPE_LABEL.hook_board : '선반') + '</select></div>' +
+    '<div class="tb-group" title="이 매대의 고리(파이프) 칸 기본 진열방식">매대 고리 <select id="md-type-pipe">' + opts('pipe', board ? TYPE_LABEL.hook_board : TYPE_LABEL.hook) + '</select></div>' +
+    (nProp ? '<div class="tb-group"><span class="tag purple" title="선반/고리를 따로 설정한 곳">선반·고리 개별 설정 ' + nProp + '</span></div>' : '') +
     '<label class="tb-group"><input type="checkbox" id="md-done"' + (P.done[md.mdidx] ? ' checked' : '') + '> 확인 완료</label>' +
     '<div class="tb-group"><button class="zbtn" data-z="out">−</button><span id="zlbl" style="min-width:38px;text-align:center">' + Math.round(zoom * 100) + '%</span><button class="zbtn" data-z="in">+</button><button class="zbtn" data-z="h">높이 맞춤</button><button class="zbtn" data-z="all">전체 보기</button></div>' +
     '<div class="legend"><span class="lg"><i style="background:#8A9099;height:4px"></i>선반</span><span class="lg"><i style="background:repeating-linear-gradient(90deg,#F47B20 0 4px,transparent 4px 6px);height:3px"></i>파이프</span><span class="lg"><i style="background:var(--green)"></i>추천값</span><span class="lg"><i style="background:var(--blue)"></i>수정함</span><span class="lg"><i style="background:var(--red)"></i>미정</span></div>';
-  if (mt !== 'auto') $('md-type').value = mt;
 }
 function renderCanvas() {
   var md = P.mds[cur];
@@ -763,10 +934,10 @@ function renderCanvas() {
   var h = '';
   L.bays.forEach(function (b) {
     h += '<div class="bay" style="left:' + (b.left - L.ox) + 'px;top:' + (b.top - L.oy) + 'px;width:' + b.w + 'px;height:' + b.h + 'px"></div>';
-    h += '<div class="baylbl" style="left:' + (b.left - L.ox) + 'px;top:' + (b.top - L.oy - 20) + 'px">' + b.no + '연' + (b.wmm ? ' · ' + b.wmm + '×' + b.hmm + 'mm' : '') + '</div>';
+    h += '<div class="baylbl" style="left:' + (b.left - L.ox) + 'px;top:' + (b.top - L.oy - 20) + 'px">' + b.label + (b.wmm ? ' · ' + b.wmm + '×' + b.hmm + 'mm' : '') + '</div>';
   });
   L.props.forEach(function (p) {
-    h += '<div class="prop' + (p.kind === '파이프' ? ' pipe' : '') + '" style="left:' + (p.x - L.ox) + 'px;top:' + (p.y - L.oy) + 'px;width:' + p.w + 'px" title="' + p.kind + '"></div>';
+    h += '<div class="prop' + (p.kind === '파이프' ? ' pipe' : '') + '" data-pk="' + esc(p.key) + '" style="left:' + (p.x - L.ox) + 'px;top:' + (p.y - L.oy) + 'px;width:' + p.w + 'px"><span class="ptag"></span></div>';
   });
   (md.memos || []).forEach(function (m) {
     h += '<div class="memo" style="left:' + (m.x - L.ox) + 'px;top:' + (m.y - L.oy) + 'px;width:' + (m.w || 80) + 'px;height:' + (m.h || 30) + 'px">' + esc(m.text) + '</div>';
@@ -813,19 +984,68 @@ function updateItems() {
     el.className = cls;
     el.querySelector('.q').textContent = q == null ? '?' : q;
     var inf = L ? L.info[it.o] : null;
-    el.title = '[' + it.code + '] ' + (prodOf(it).name || it.name) + '\n수량 ' + (q == null ? '미정' : q) + ' · ' + (inf ? inf.bay + '연 ' + (inf.tier ? inf.tier + '단 ' : '') + inf.kind : '');
+    if (inf && inf.out) cls += ' out';
+    el.className = cls;
+    el.title = '[' + it.code + '] ' + (prodOf(it).name || it.name) + '\n수량 ' + (q == null ? '미정' : q) + ' · ' + (inf ? (inf.out ? '매대 밖' : inf.bayLabel + ' ' + (inf.tier ? inf.tier + '단 ' : '') + inf.kind) : '') + ' · ' + (TYPE_LABEL[t] || '');
+  });
+  var onProps = {};
+  sel.forEach(function (o) { var inf = L && L.info[o]; if (inf && inf.prop) onProps[inf.prop] = 1; });
+  inner.querySelectorAll('.prop').forEach(function (el) {
+    var pk = el.getAttribute('data-pk'), pt = propType(md, pk);
+    el.classList.toggle('on', !!onProps[pk]);
+    el.querySelector('.ptag').textContent = pt ? TYPE_LABEL[pt].replace(/\s*\(.*\)/, '') : '';
+    el.title = propName(md, pk) + (pt ? ' · ' + TYPE_LABEL[pt] : ' · 매대 설정 따름') + '\n클릭: 이 줄의 상품 모두 선택';
   });
 }
 function kindChip(inf) {
   if (!inf) return '';
-  return '<span class="chip' + (inf.kind === '파이프' ? ' pipe' : inf.kind === '미확인' ? ' gray' : '') + '">' + inf.bay + '연' + (inf.tier ? ' · ' + inf.tier + '단' : '') + ' · ' + inf.kind + '</span>';
+  return '<span class="chip' + (inf.kind === '파이프' ? ' pipe' : inf.kind === '미확인' ? ' gray' : '') + '">' + (inf.out ? '⚠️ 매대 밖 (자동 제외)' : inf.bayLabel + (inf.tier ? ' · ' + inf.tier + '단' : '') + ' · ' + inf.kind) + '</span>';
 }
 function typeOptions(md, it, selected, withKeep) {
   var base = it ? baseType(md, it) : null;
   var h = withKeep ? '<option value="__">— 선택 —</option>' : '';
-  h += '<option value="">매대 기본 따르기' + (base ? ' (' + TYPE_LABEL[base] + ')' : '') + '</option>';
-  h += TYPES.map(function (t) { return '<option value="' + t.id + '"' + (selected === t.id ? ' selected' : '') + '>' + t.label + '</option>'; }).join('');
+  h += '<option value="">선반·매대 설정 따르기' + (base ? ' (' + esc(TYPE_LABEL[base]) + ')' : '') + '</option>';
+  h += TYPES.map(function (t) { return '<option value="' + t.id + '"' + (selected === t.id ? ' selected' : '') + '>' + esc(t.label) + '</option>'; }).join('');
   return h;
+}
+function typeSource(md, it) {
+  var e = P.edits[it.o], inf = layoutOf(md).info[it.o];
+  if (e && validType(e.type)) return '칸 설정';
+  if (inf && inf.out) return '매대 밖';
+  if (propType(md, inf && inf.prop)) return '선반/고리 설정';
+  if (validType(mdRule(md)[inf && inf.kind === '파이프' ? 'pipe' : 'shelf'])) return '매대 설정';
+  return '자동';
+}
+// 선택한 칸들이 놓인 선반/고리 목록
+function selProps(list) {
+  var out = {};
+  list.forEach(function (x) {
+    var inf = layoutOf(x.md).info[x.it.o];
+    if (inf && inf.prop) out[pkey2(x.md, inf.prop)] = { md: x.md, pk: inf.prop };
+  });
+  return out;
+}
+function propItems(md, pk) { var L = layoutOf(md); return md.items.filter(function (it) { return L.info[it.o] && L.info[it.o].prop === pk; }); }
+function propSection(list, single) {
+  var pm = selProps(list), keys = Object.keys(pm);
+  if (!keys.length) return '<div class="sec"><label>선반 · 고리 진열방식</label><div class="muted">어느 선반/고리에 놓였는지 찾지 못한 칸이에요 (미확인). 매대 설정이나 칸 설정을 쓰세요.</div></div>';
+  var vals = keys.map(function (k) { return validType(P.propTypes[k]) ? P.propTypes[k] : ''; });
+  var same = vals.every(function (v) { return v === vals[0]; });
+  var cells = 0;
+  keys.forEach(function (k) { cells += propItems(pm[k].md, pm[k].pk).length; });
+  var f = pm[keys[0]], fi = propItems(f.md, f.pk)[0];
+  var h = '<div class="sec"><label>선반 · 고리 진열방식 · ' + (keys.length === 1 ? esc(propName(f.md, f.pk)) : keys.length + '줄') + '</label><select id="pr-type">' +
+    (same ? '' : '<option value="__" selected>— 줄마다 달라요 —</option>') +
+    '<option value=""' + (same && !vals[0] ? ' selected' : '') + '>매대 설정 따르기' + (keys.length === 1 && fi ? ' (' + esc(TYPE_LABEL[mdLevelType(f.md, fi)]) + ')' : '') + '</option>' +
+    TYPES.map(function (t) { return '<option value="' + t.id + '"' + (same && vals[0] === t.id ? ' selected' : '') + '>' + esc(t.label) + '</option>'; }).join('') + '</select>' +
+    '<div class="muted">이 ' + (keys.length === 1 ? '줄' : keys.length + '줄') + '에 놓인 ' + cells + '칸 모두에 적용돼요. 칸별로 따로 바꾼 칸은 칸 설정이 우선이에요.</div>';
+  if (single && keys.length === 1 && cells > 1) h += '<button class="sbtn gray" data-act="selprop" style="margin-top:6px;width:100%">이 줄 ' + cells + '칸 모두 선택</button>';
+  return h + '</div>';
+}
+function setPropType(list, t) {
+  var pm = selProps(list);
+  Object.keys(pm).forEach(function (k) { if (t) P.propTypes[k] = t; else delete P.propTypes[k]; });
+  changed();
 }
 function depthText(t) {
   if (SET.depth[t]) return '진열깊이 ' + SET.depth[t] + 'mm';
@@ -833,8 +1053,27 @@ function depthText(t) {
   if (t === 'file_holder') return '고정 ' + SET.fileQty + '개';
   return '';
 }
+function prodHead(it, p, chips) {
+  return '<div class="pimg">' + (it.img ? '<img src="' + esc(it.img) + '">' : '<span style="color:var(--g4)">이미지 없음</span>') + '</div>' +
+    '<div class="pname">' + esc(p.name || it.name) + '</div><div class="pcode">' + esc(it.code) + '</div>' +
+    '<div class="chips">' + (chips || '') + (p.isNew === 'Y' ? '<span class="chip">신상품</span>' : '') + '</div>' +
+    (p.error ? '<div class="warnbox">상세정보를 못 읽었어요 (' + esc(p.error) + ')</div>' : '');
+}
+function prodTable(it, p) {
+  return '<table class="kv">' +
+    '<tr><td>가로×세로</td><td>' + (p.w != null ? p.w + ' × ' + p.h + ' mm' : '—') + '</td></tr>' +
+    '<tr><td>뎁스</td><td>' + (p.d ? p.d + ' mm' : (it.gd ? it.gd + ' mm <span class="muted">(POG 그룹값)</span>' : '<b style="color:var(--red)">없음</b>')) + '</td></tr>' +
+    '<tr><td>팩킹수량</td><td>' + (p.pack || '—') + '</td></tr>' +
+    '<tr><td>판매가</td><td>' + (it.price ? '₩' + fmt(it.price) : '—') + '</td></tr>' +
+    '<tr><td>재고</td><td>' + esc(p.stock || '—') + '</td></tr>' +
+    '<tr><td>대분류</td><td>' + esc(p.cat1 || '—') + '</td></tr>' +
+    '<tr><td>중분류</td><td>' + esc(p.cat2 || '—') + '</td></tr>' +
+    '<tr><td>소분류</td><td>' + esc(p.cat3 || '—') + '</td></tr>' +
+    '</table>';
+}
 function renderPanel() {
   if (!P) { panel.innerHTML = ''; return; }
+  if (VIEW === 'table') { renderTablePanel(); return; }
   var md = P.mds[cur];
   var list = Array.from(sel).map(function (o) { return ITEM_INDEX[o]; }).filter(Boolean);
   if (!list.length) {
@@ -854,21 +1093,9 @@ function renderPanel() {
     same.forEach(function (x) { if (x.md !== mdx) otherMds[x.md.mdidx] = x.md.name; });
     var otherNames = Object.keys(otherMds).map(function (k) { return otherMds[k]; });
     panel.innerHTML =
-      '<div class="pimg">' + (it.img ? '<img src="' + esc(it.img) + '">' : '<span style="color:var(--g4)">이미지 없음</span>') + '</div>' +
-      '<div class="pname">' + esc(p.name || it.name) + '</div><div class="pcode">' + esc(it.code) + '</div>' +
-      '<div class="chips">' + kindChip(inf) + (p.isNew === 'Y' ? '<span class="chip">신상품</span>' : '') + '</div>' +
-      (p.error ? '<div class="warnbox">상세정보를 못 읽었어요 (' + esc(p.error) + ')</div>' : '') +
-      '<table class="kv">' +
-      '<tr><td>가로×세로</td><td>' + (p.w != null ? p.w + ' × ' + p.h + ' mm' : '—') + '</td></tr>' +
-      '<tr><td>뎁스</td><td>' + (p.d ? p.d + ' mm' : (it.gd ? it.gd + ' mm <span class="muted">(POG 그룹값)</span>' : '<b style="color:var(--red)">없음</b>')) + '</td></tr>' +
-      '<tr><td>팩킹수량</td><td>' + (p.pack || '—') + '</td></tr>' +
-      '<tr><td>판매가</td><td>' + (it.price ? '₩' + fmt(it.price) : '—') + '</td></tr>' +
-      '<tr><td>재고</td><td>' + esc(p.stock || '—') + '</td></tr>' +
-      '<tr><td>대분류</td><td>' + esc(p.cat1 || '—') + '</td></tr>' +
-      '<tr><td>중분류</td><td>' + esc(p.cat2 || '—') + '</td></tr>' +
-      '<tr><td>소분류</td><td>' + esc(p.cat3 || '—') + '</td></tr>' +
-      '</table>' +
-      '<div class="sec"><label>진열방식 (이 칸)</label><select id="p-type">' + typeOptions(mdx, it, e.type || '', false) + '</select><div class="muted">' + depthText(t) + '</div></div>' +
+      prodHead(it, p, kindChip(inf)) + prodTable(it, p) +
+      '<div class="sec"><label>진열방식 (이 칸)</label><select id="p-type">' + typeOptions(mdx, it, validType(e.type) ? e.type : '', false) + '</select><div class="muted">' + esc(TYPE_LABEL[t]) + ' · ' + depthText(t) + ' · <b>' + typeSource(mdx, it) + '</b> 기준</div></div>' +
+      propSection(list, true) +
       '<div class="recbox' + (r.qty == null ? ' bad' : '') + '">추천 수량 <b>' + (r.qty == null ? '미정' : r.qty) + '</b><div class="muted" style="color:inherit;opacity:.8">' + esc(r.expl) + '</div></div>' +
       '<div class="sec"><label>최종 수량' + (e.qty != null ? ' <span style="color:var(--blue)">· 직접 수정함</span>' : '') + '</label>' +
       '<div class="stepper"><button class="sbtn" data-act="dec">−' + step + '</button><input type="number" id="p-qty" min="0" value="' + (q == null ? '' : q) + '" placeholder="?"><button class="sbtn" data-act="inc">+' + step + '</button></div>' +
@@ -894,7 +1121,8 @@ function renderPanel() {
     '<div class="sec"><label>수량 한 번에 입력 (선택한 칸마다)</label><div class="row"><input type="number" id="m-qty" min="0" placeholder="예: 6"><button class="sbtn fill" data-act="mset">적용</button></div>' +
     '<div class="row"><button class="sbtn" data-act="dec" style="flex:1">− 팩킹</button><button class="sbtn" data-act="inc" style="flex:1">+ 팩킹</button></div>' +
     '<div class="row"><button class="sbtn gray" data-act="reset" style="flex:1">추천값으로 되돌리기</button><button class="sbtn gray" data-act="zero">0개 (제외)</button></div></div>' +
-    '<div class="sec"><label>진열방식 한 번에 변경</label><select id="m-type">' + typeOptions(md, null, '', true) + '</select></div>' +
+    '<div class="sec"><label>진열방식 한 번에 변경 (칸마다)</label><select id="m-type">' + typeOptions(md, null, '', true) + '</select></div>' +
+    propSection(list, false) +
     '<div class="sec"><label>선택한 상품 (클릭하면 그 상품만 선택)</label><div class="plist">' + order.map(function (c) {
       var g = groups[c], pp = prodOf(g.it);
       return '<div class="prow" data-act="only" data-code="' + esc(c) + '">' + (g.it.img ? '<img src="' + esc(g.it.img) + '">' : '<img>') + '<div class="nm">' + esc(pp.name || g.it.name) + '<div class="ct">' + esc(c) + '</div></div><div class="ct">' + g.n + '칸 · ' + (g.unk ? '<span style="color:var(--red)">?</span>' : fmt(g.q) + '개') + '</div></div>';
@@ -904,7 +1132,11 @@ function renderPanel() {
 /* ---------- 편집 동작 ---------- */
 function edit(o) { return P.edits[o] || (P.edits[o] = {}); }
 function clean(o) { var e = P.edits[o]; if (e && e.qty == null && !e.type) delete P.edits[o]; }
-function changed() { saveSoon(); updateItems(); renderPanel(); renderSidebar(); renderHeader(); }
+function changed() {
+  saveSoon();
+  if (VIEW === 'pog') { renderToolbar(P.mds[cur]); updateItems(); }
+  renderPanel(); renderSidebar(); renderHeader();
+}
 function setQty(os, v) {
   os.forEach(function (o) {
     var e = edit(o);
@@ -939,6 +1171,215 @@ function switchMd(i) {
   viewport.scrollTop = 0; viewport.scrollLeft = 0;
 }
 
+/* ---------- 표 보기 (엑셀처럼 한눈에) ---------- */
+var VIEW = 'pog';
+try { if (localStorage.getItem('pogfl:view') === 'table') VIEW = 'table'; } catch (e) {}
+var TV = { mode: 'prod', sortK: null, sortDir: 1, md: '', only: '', pick: null };
+var tview = $('tview');
+var TV_COLS = {
+  prod: [
+    { k: 'img', t: '' }, { k: 'code', t: '제품코드' }, { k: 'name', t: '제품명' }, { k: 'cat1', t: '대분류' }, { k: 'cat2', t: '중분류' }, { k: 'cat3', t: '소분류' },
+    { k: 'd', t: '뎁스', n: 1 }, { k: 'pack', t: '팩킹', n: 1 }, { k: 'price', t: '판매가', n: 1 }, { k: 'mdn', t: '매대수', n: 1 }, { k: 'cnt', t: '칸수', n: 1 }, { k: 'qty', t: '총수량', n: 1 }, { k: 'note', t: '상태' }, { k: 'mds', t: '매대목록' }
+  ],
+  cell: [
+    { k: 'mdname', t: '매대명' }, { k: 'bay', t: '연' }, { k: 'tier', t: '단', n: 1 }, { k: 'kind', t: '위치' }, { k: 'type', t: '진열방식' }, { k: 'code', t: '제품코드' }, { k: 'name', t: '제품명' },
+    { k: 'd', t: '뎁스', n: 1 }, { k: 'pack', t: '팩킹', n: 1 }, { k: 'rec', t: '추천', n: 1 }, { k: 'qty', t: '최종수량', n: 1 }, { k: 'ed', t: '수정' }
+  ]
+};
+function setView(v) {
+  VIEW = v;
+  try { localStorage.setItem('pogfl:view', v); } catch (e) {}
+  if (!P) return;
+  renderAll();
+}
+function tvCells() {
+  var out = [];
+  P.mds.forEach(function (md, mi) {
+    if (md.error || (TV.md && TV.md !== md.mdidx)) return;
+    var L = layoutOf(md);
+    sortedItems(md).forEach(function (it) {
+      var inf = L.info[it.o] || {}, p = prodOf(it), t = typeOf(md, it), r = recOf(md, it), q = qtyOf(md, it);
+      out.push({ o: it.o, it: it, md: md, mi: mi, mdname: md.name, bay: inf.bayLabel || '', tier: inf.tier || null, kind: inf.kind || '', type: TYPE_LABEL[t] || '', tid: t,
+        code: it.code, name: p.name || it.name, d: depthOf(it), pack: p.pack || null, rec: r.qty, qty: q, ed: isEdited(it.o) ? 'Y' : '',
+        cat1: p.cat1 || '', cat2: p.cat2 || '', cat3: p.cat3 || '', price: it.price || null, img: it.img });
+    });
+  });
+  return out;
+}
+function tvRows() {
+  var cells = tvCells(), rows;
+  if (searchQ) cells = cells.filter(function (c) { return matches(c.it); });
+  if (TV.mode === 'cell') {
+    rows = cells;
+    if (TV.only === 'unk') rows = rows.filter(function (c) { return c.qty == null; });
+    if (TV.only === 'ed') rows = rows.filter(function (c) { return c.ed; });
+    if (TV.only === 'ex') rows = rows.filter(function (c) { return c.qty === 0 || c.tid === 'none'; });
+  } else {
+    var g = {}, order = [];
+    cells.forEach(function (c) {
+      var r = g[c.code];
+      if (!r) { r = g[c.code] = { code: c.code, name: c.name, cat1: c.cat1, cat2: c.cat2, cat3: c.cat3, d: c.d, pack: c.pack, price: c.price, img: c.img, cnt: 0, qty: 0, unk: 0, edn: 0, mdset: {}, mdl: [] }; order.push(c.code); }
+      r.cnt++;
+      if (c.qty == null) r.unk++; else r.qty += c.qty;
+      if (c.ed) r.edn++;
+      if (!r.mdset[c.md.mdidx]) { r.mdset[c.md.mdidx] = 1; r.mdl.push(c.mdname); }
+    });
+    rows = order.map(function (k) { var r = g[k]; r.mdn = r.mdl.length; r.mds = r.mdl.join(', '); r.note = (r.unk ? '미정 ' + r.unk + '칸' : '') + (r.unk && r.edn ? ' · ' : '') + (r.edn ? '수정 ' + r.edn : ''); return r; });
+    if (TV.only === 'unk') rows = rows.filter(function (r) { return r.unk; });
+    if (TV.only === 'ed') rows = rows.filter(function (r) { return r.edn; });
+    if (TV.only === 'ex') rows = rows.filter(function (r) { return r.qty === 0 && !r.unk; });
+  }
+  if (TV.sortK) {
+    var k = TV.sortK, dir = TV.sortDir;
+    rows = rows.slice().sort(function (a, b) {
+      var x = a[k], y = b[k];
+      if (x == null || x === '') return 1;
+      if (y == null || y === '') return -1;
+      if (typeof x === 'number' && typeof y === 'number') return (x - y) * dir;
+      return String(x).localeCompare(String(y), 'ko', { numeric: true }) * dir;
+    });
+  }
+  return rows;
+}
+function tvCell(c, r) {
+  var v = r[c.k];
+  if (c.k === 'img') return '<td>' + (r.img ? '<img src="' + esc(r.img) + '" loading="lazy" onerror="this.style.visibility=\'hidden\'">' : '') + '</td>';
+  if (c.k === 'qty' && TV.mode === 'cell') return '<td class="n"><input class="tq" type="number" min="0" data-o="' + esc(r.o) + '" value="' + (v == null ? '' : v) + '" placeholder="?"></td>';
+  if (c.k === 'qty' && TV.mode === 'prod') return '<td class="n"><b>' + fmt(v) + '</b>' + (r.unk ? ' <span class="unk">+?</span>' : '') + '</td>';
+  if (c.k === 'rec' && v == null) return '<td class="n unk">미정</td>';
+  if (c.k === 'note' && r.unk) return '<td class="unk">' + esc(v) + '</td>';
+  if (c.k === 'tier') return '<td class="n">' + (v ? v + '단' : '') + '</td>';
+  if (c.k === 'price') return '<td class="n">' + (v ? fmt(v) : '') + '</td>';
+  return '<td' + (c.n ? ' class="n"' : '') + (c.k === 'name' || c.k === 'mds' ? ' title="' + esc(v) + '"' : '') + '>' + esc(c.n ? (v == null ? '' : fmt(v)) : v) + '</td>';
+}
+function tvRowHtml(r, i, cols) {
+  var key = TV.mode === 'cell' ? r.o : r.code;
+  var on = TV.pick && (TV.mode === 'cell' ? TV.pick.o === r.o : TV.pick.code === r.code);
+  var cls = (on ? 'on ' : '') + (TV.mode === 'cell' && r.ed ? 'ed ' : '') + ((TV.mode === 'cell' ? (r.qty === 0 || r.tid === 'none') : (r.qty === 0 && !r.unk)) ? 'ex' : '');
+  return '<tr data-k="' + esc(key) + '" data-code="' + esc(r.code) + '" class="' + cls + '"><td class="rn">' + (i + 1) + '</td>' + cols.map(function (c) { return tvCell(c, r); }).join('') + '</tr>';
+}
+function renderTable() {
+  if (!P) return;
+  var cols = TV_COLS[TV.mode];
+  if (TV.md && !P.mds.some(function (m) { return m.mdidx === TV.md; })) TV.md = '';
+  if (TV.sortK && !cols.some(function (c) { return c.k === TV.sortK; })) TV.sortK = null;
+  var rows = tvRows();
+  var tq = 0, unk = 0;
+  rows.forEach(function (r) { if (TV.mode === 'cell') { if (r.qty == null) unk++; else tq += r.qty; } else { tq += r.qty; unk += r.unk; } });
+  var sc = tview.querySelector('.tscroll'), st = sc ? sc.scrollTop : 0, sl = sc ? sc.scrollLeft : 0;
+  tview.innerHTML =
+    '<div class="tvbar">' +
+    '<div class="seg"><button data-tvmode="prod"' + (TV.mode === 'prod' ? ' class="on"' : '') + '>상품별</button><button data-tvmode="cell"' + (TV.mode === 'cell' ? ' class="on"' : '') + '>칸별</button></div>' +
+    '<select id="tv-md"><option value="">전체 매대 (' + P.mds.length + ')</option>' + P.mds.map(function (m) { return '<option value="' + esc(m.mdidx) + '"' + (TV.md === m.mdidx ? ' selected' : '') + '>' + esc(m.name) + '</option>'; }).join('') + '</select>' +
+    '<select id="tv-only"><option value="">모두 보기</option><option value="unk"' + (TV.only === 'unk' ? ' selected' : '') + '>수량 미정만</option><option value="ed"' + (TV.only === 'ed' ? ' selected' : '') + '>수정한 것만</option><option value="ex"' + (TV.only === 'ex' ? ' selected' : '') + '>0개 · 제외만</option></select>' +
+    (searchQ ? '<span class="tag purple">검색: ' + esc(searchQ) + '</span>' : '') +
+    '<span class="tvcnt">' + fmt(rows.length) + (TV.mode === 'cell' ? '칸' : '종') + ' · 합계 ' + fmt(tq) + '개' + (unk ? ' · <span class="unk">미정 ' + unk + '칸</span>' : '') + '</span>' +
+    '<button class="sbtn gray" id="tv-xlsx" style="padding:4px 10px;font-size:12px">이 표 엑셀 저장</button>' +
+    '</div>' +
+    '<div class="tscroll"><table class="xt"><thead><tr><th style="cursor:default">#</th>' + cols.map(function (c) {
+      var on = TV.sortK === c.k;
+      return '<th' + (c.k === 'img' ? ' style="cursor:default"' : ' data-sort="' + c.k + '"') + (on ? ' class="sorted"' : '') + '>' + c.t + (on ? (TV.sortDir > 0 ? ' ▲' : ' ▼') : '') + '</th>';
+    }).join('') + '</tr></thead><tbody>' +
+    (rows.length ? rows.map(function (r, i) { return tvRowHtml(r, i, cols); }).join('') : '<tr><td colspan="' + (cols.length + 1) + '" style="text-align:center;padding:40px;color:var(--g4)">조건에 맞는 항목이 없어요</td></tr>') +
+    '</tbody></table></div>';
+  sc = tview.querySelector('.tscroll'); sc.scrollTop = st; sc.scrollLeft = sl;
+}
+function tvExport() {
+  var cols = TV_COLS[TV.mode].filter(function (c) { return c.k !== 'img'; });
+  var rows = tvRows().map(function (r) { return cols.map(function (c) { var v = r[c.k]; if (c.k === 'tier') return v ? v + '단' : ''; if ((c.k === 'rec' || c.k === 'qty') && v == null) return '미정'; return v == null ? '' : v; }); });
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, sheet(cols.map(function (c) { return c.t; }), rows, cols.map(function (c) { return c.k === 'name' ? 34 : c.k === 'mds' ? 40 : c.k === 'mdname' ? 22 : c.n ? 8 : 12; })), TV.mode === 'cell' ? '칸별' : '상품별');
+  var nm = (P.store.name || P.store.code || '매장').replace(/[\\/:*?"<>|]+/g, '_');
+  XLSX.writeFile(wb, '초도리스트_표_' + nm + '_' + new Date().toISOString().slice(0, 10) + '.xlsx');
+}
+function renderTablePanel() {
+  if (!TV.pick) {
+    panel.innerHTML = '<div class="help"><b>행을 클릭</b>하면 상품 상세정보와 POG 위치가 여기 나와요.<br><br>• <b>상품별</b>: 매장 전체에서 상품마다 합친 수량<br>• <b>칸별</b>: POG 칸 하나하나 — 최종수량을 바로 고칠 수 있어요 (<kbd>Enter</kbd>로 다음 줄)<br>• 제목 칸을 누르면 정렬, 위쪽 검색창으로 찾기<br>• 위치를 누르면 POG 보기로 가서 그 칸을 보여줘요</div>';
+    return;
+  }
+  var code = TV.pick.code;
+  var locs = (CODE_INDEX[code] || []).map(function (o) { return ITEM_INDEX[o]; }).filter(Boolean);
+  if (!locs.length) { TV.pick = null; renderTablePanel(); return; }
+  var it = locs[0].it, p = prodOf(it);
+  var tot = 0, unk = 0, mdn = {};
+  locs.forEach(function (x) { var q = qtyOf(x.md, x.it); if (q == null) unk++; else tot += q; mdn[x.md.mdidx] = 1; });
+  panel.innerHTML = prodHead(it, p) +
+    '<div class="recbox' + (unk ? ' bad' : '') + '">매장 전체 <b>' + fmt(tot) + '개</b>' + (unk ? ' <span class="unk">+ 미정 ' + unk + '칸</span>' : '') + '<div class="muted" style="color:inherit;opacity:.8">' + locs.length + '칸 · 매대 ' + Object.keys(mdn).length + '곳</div></div>' +
+    prodTable(it, p) +
+    '<div class="sec"><label>POG 위치 (' + locs.length + '칸) — 누르면 POG에서 보기</label><div class="plist">' + locs.map(function (x) {
+      var inf = layoutOf(x.md).info[x.it.o] || {}, q = qtyOf(x.md, x.it), t = typeOf(x.md, x.it);
+      return '<div class="loc" data-goto="' + esc(x.it.o) + '"' + (TV.pick.o === x.it.o ? ' style="background:var(--ol)"' : '') + '><div class="nm"><b>' + esc(x.md.name) + '</b><div class="ct">' + esc((inf.bayLabel || '') + (inf.tier ? ' · ' + inf.tier + '단' : '') + ' · ' + (TYPE_LABEL[t] || '')) + (isEdited(x.it.o) ? ' · <span style="color:var(--blue)">수정함</span>' : '') + '</div></div><div class="' + (q == null ? 'unk' : '') + '"><b>' + (q == null ? '?' : q) + '</b>개</div></div>';
+    }).join('') + '</div>' +
+    '<button class="sbtn fill" data-goto-all="1" style="margin-top:8px;width:100%">POG에서 이 상품 보기 →</button></div>' +
+    '<a class="link" href="https://pog.artbox.kr/popGodCodeInfo.aspx?iv_god_code=' + encodeURIComponent(code) + '" target="_blank" rel="noopener">POG 상세정보 열기 ↗</a>';
+}
+// POG 보기로 가서 해당 칸(들)을 선택하고 화면 가운데로
+function gotoPog(os) {
+  var first = ITEM_INDEX[os[0]];
+  if (!first) return;
+  var mi = P.mds.indexOf(first.md);
+  VIEW = 'pog';
+  try { localStorage.setItem('pogfl:view', 'pog'); } catch (e) {}
+  renderAll();
+  switchMd(mi);
+  sel = new Set(os.filter(function (o) { return ITEM_INDEX[o] && ITEM_INDEX[o].md === first.md; }));
+  afterSel();
+  var el = inner.querySelector('.it[data-o="' + (window.CSS && CSS.escape ? CSS.escape(os[0]) : os[0]) + '"]');
+  if (el) el.scrollIntoView({ block: 'center', inline: 'center' });
+}
+tview.addEventListener('click', function (e) {
+  var b = e.target.closest('[data-tvmode]');
+  if (b) { TV.mode = b.getAttribute('data-tvmode'); renderTable(); return; }
+  var th = e.target.closest('th[data-sort]');
+  if (th) {
+    var k = th.getAttribute('data-sort');
+    if (TV.sortK === k) { if (TV.sortDir > 0) TV.sortDir = -1; else TV.sortK = null; } else { TV.sortK = k; TV.sortDir = 1; }
+    renderTable(); return;
+  }
+  if (e.target.id === 'tv-xlsx') { tvExport(); return; }
+  var tr = e.target.closest('tbody tr[data-k]');
+  if (tr) {
+    TV.pick = { code: tr.getAttribute('data-code'), o: TV.mode === 'cell' ? tr.getAttribute('data-k') : null };
+    tview.querySelectorAll('tbody tr.on').forEach(function (x) { x.classList.remove('on'); });
+    tr.classList.add('on');
+    renderPanel();
+  }
+});
+tview.addEventListener('change', function (e) {
+  if (e.target.id === 'tv-md') { TV.md = e.target.value; renderTable(); }
+  else if (e.target.id === 'tv-only') { TV.only = e.target.value; renderTable(); }
+  else if (e.target.classList.contains('tq')) {
+    var o = e.target.getAttribute('data-o'), v = e.target.value;
+    setQty([o], v === '' ? null : +v);
+    // 표 전체를 다시 그리면 다음 칸 포커스가 사라져서 이 줄만 갱신
+    var x = ITEM_INDEX[o], tr = e.target.closest('tr');
+    if (x && tr) {
+      var q = qtyOf(x.md, x.it);
+      e.target.value = q == null ? '' : q;
+      tr.classList.toggle('ed', isEdited(o));
+      tr.classList.toggle('ex', q === 0 || typeOf(x.md, x.it) === 'none');
+      tr.lastElementChild.textContent = isEdited(o) ? 'Y' : '';
+    }
+  }
+});
+tview.addEventListener('keydown', function (e) {
+  if (e.key !== 'Enter' || !e.target.classList.contains('tq')) return;
+  e.preventDefault();
+  var all = [].slice.call(tview.querySelectorAll('input.tq')), i = all.indexOf(e.target);
+  var nx = all[i + (e.shiftKey ? -1 : 1)];
+  if (nx) { nx.focus(); nx.select(); } else e.target.blur();
+});
+panel.addEventListener('click', function (e) {
+  if (VIEW !== 'table' || !TV.pick) return;
+  var g = e.target.closest('[data-goto]');
+  if (g) { gotoPog([g.getAttribute('data-goto')]); return; }
+  if (e.target.closest('[data-goto-all]')) {
+    var os = CODE_INDEX[TV.pick.code] || [];
+    if (os.length) gotoPog(os);
+  }
+});
+$('vtabs').addEventListener('click', function (e) { var b = e.target.closest('[data-view]'); if (b) setView(b.getAttribute('data-view')); });
+
 /* ---------- 엑셀 ---------- */
 function sortedItems(md) {
   var L = layoutOf(md);
@@ -948,14 +1389,15 @@ function sortedItems(md) {
   });
 }
 function buildExport() {
-  var byMd = [], total = {}, totalOrder = [], detail = [], unkCells = 0, exCells = 0;
+  var byMd = [], total = {}, totalOrder = [], detail = [], unkCells = 0, exCells = 0, outCells = 0;
   P.mds.forEach(function (md) {
     if (md.error) return;
     var L = layoutOf(md), g = {}, order = [];
     sortedItems(md).forEach(function (it) {
       var q = qtyOf(md, it), t = typeOf(md, it), inf = L.info[it.o], p = prodOf(it), r = recOf(md, it);
-      detail.push([md.name, inf.bay + '연', inf.tier ? inf.tier + '단' : '', inf.kind, TYPE_LABEL[t], SET.depth[t] || '', it.code, p.name || it.name, p.w, p.h, depthOf(it), p.pack || '', r.qty == null ? '미정' : r.qty, q == null ? '미정' : q, isEdited(it.o) ? 'Y' : '']);
-      if (t === 'none' || q === 0) { exCells++; return; }
+      detail.push([md.name, inf.bayLabel, inf.tier ? inf.tier + '단' : '', inf.kind, TYPE_LABEL[t], SET.depth[t] || '', it.code, p.name || it.name, p.w, p.h, depthOf(it), p.pack || '', r.qty == null ? '미정' : r.qty, q == null ? '미정' : q, isEdited(it.o) ? 'Y' : '']);
+      var hasQ = P.edits[it.o] && P.edits[it.o].qty != null;
+      if (q === 0 || (t === 'none' && !hasQ)) { exCells++; if (inf.out) outCells++; return; }
       if (!g[it.code]) { g[it.code] = { name: p.name || it.name, qty: 0, cnt: 0, unk: 0 }; order.push(it.code); }
       var rr = g[it.code];
       rr.cnt++;
@@ -973,7 +1415,7 @@ function buildExport() {
     var T = total[c], p = P.products[c] || {};
     return [c, T.name, T.qty, T.cnt, T.mds.length, T.mds.join(', '), p.cat1 || '', p.cat2 || '', p.cat3 || '', T.unk ? '수량 미정 ' + T.unk + '칸' : ''];
   });
-  return { byMd: byMd, tot: tot, detail: detail, unkCells: unkCells, exCells: exCells };
+  return { byMd: byMd, tot: tot, detail: detail, unkCells: unkCells, exCells: exCells, outCells: outCells };
 }
 function sheet(header, rows, widths) {
   var ws = XLSX.utils.aoa_to_sheet([header].concat(rows));
@@ -1000,7 +1442,7 @@ function openFinal() {
   if (X.unkCells) h += '<div class="warnbox">⚠️ 수량이 정해지지 않은 칸이 <b>' + X.unkCells + '칸</b> 있어요. 엑셀에는 0으로 합산되고 비고에 표시돼요. <a href="#" id="goto-unk" style="color:inherit;font-weight:700">미정 칸 보러가기 →</a></div>';
   if (notDone.length) h += '<div class="infobox">확인 완료 표시를 안 한 매대 ' + notDone.length + '개: ' + esc(notDone.slice(0, 6).map(function (m) { return m.name; }).join(', ')) + (notDone.length > 6 ? ' 외' : '') + '</div>';
   if (failed.length) h += '<div class="warnbox">읽기 실패한 매대 ' + failed.length + '개는 엑셀에서 빠져요: ' + esc(failed.map(function (m) { return m.name; }).join(', ')) + '</div>';
-  if (X.exCells) h += '<div class="muted" style="margin-top:10px">0개 또는 제외로 설정한 ' + X.exCells + '칸은 엑셀에서 빠져요.</div>';
+  if (X.exCells) h += '<div class="muted" style="margin-top:10px">0개 또는 제외로 설정한 ' + X.exCells + '칸은 엑셀에서 빠져요' + (X.outCells ? ' (이 중 매대 밖 상품 ' + X.outCells + '칸)' : '') + '.</div>';
   h += '<div class="muted" style="margin-top:10px">시트 구성: <b>매대별</b> (제품코드·제품명·매대명·수량·중복·대/중/소분류) · <b>전체합계</b> (상품별 총수량) · <b>칸별상세</b> (검토용)</div>';
   $('final-body').innerHTML = h;
   var g = $('goto-unk');
@@ -1011,12 +1453,12 @@ function gotoUnknown() {
   for (var i = 0; i < P.mds.length; i++) {
     var md = P.mds[i];
     var os = md.items.filter(function (it) { return qtyOf(md, it) == null; }).map(function (it) { return it.o; });
-    if (os.length) { switchMd(i); sel = new Set(os); afterSel(); toast('미정 ' + os.length + '칸을 선택했어요'); return; }
+    if (os.length) { gotoPog(os); toast('미정 ' + os.length + '칸을 선택했어요'); return; }
   }
 }
 function exportProgress() {
   if (!P) return;
-  var b = new Blob([JSON.stringify({ type: 'POG_FL_PROJECT', version: 1, exportedAt: new Date().toISOString(), project: P })], { type: 'application/json' });
+  var b = new Blob([JSON.stringify({ type: 'POG_FL_PROJECT', version: 1, exportedAt: new Date().toISOString(), project: P, settings: { custom: SET.custom, depth: SET.depth } })], { type: 'application/json' });
   var a = document.createElement('a');
   a.href = URL.createObjectURL(b);
   a.download = '초도리스트_진행상황_' + (P.store.name || P.store.code || '').replace(/[^\w가-힣]+/g, '_') + '_' + new Date().toISOString().slice(0, 10) + '.json';
@@ -1050,6 +1492,27 @@ function renderSettings() {
     '<div><label>수량 상한 (개)</label><input type="number" id="s-cap" value="' + SET.cap + '"></div>' +
     '<div><label>카드선반 기본값 (팩킹수량 없을 때)</label><input type="number" id="s-card" value="' + SET.cardDefault + '"></div>' +
     '<div><label>화일집기 고정수량 (개)</label><input type="number" id="s-file" value="' + SET.fileQty + '"></div>';
+  $('cust-list').innerHTML = SET.custom.map(function (c) { return custRow(c.id, c.label, SET.depth[c.id]); }).join('');
+}
+function custRow(id, label, depth) {
+  return '<div class="cust-row" data-id="' + esc(id) + '"><input class="cn" placeholder="이름 (예: 스페이스월 고리 120)" value="' + esc(label || '') + '"><input class="cd2" type="number" min="1" placeholder="깊이" value="' + (depth || '') + '"><span class="muted" style="margin:0">mm</span><button class="sbtn gray" data-del-cust>삭제</button></div>';
+}
+function typeUsage(id) {
+  if (!P) return 0;
+  var n = 0;
+  Object.keys(P.edits).forEach(function (o) { if (P.edits[o].type === id) n++; });
+  Object.keys(P.propTypes).forEach(function (k) { if (P.propTypes[k] === id) n++; });
+  Object.keys(P.mdTypes).forEach(function (k) { var r = P.mdTypes[k]; if (r === id || (r && (r.shelf === id || r.pipe === id))) n++; });
+  return n;
+}
+function dropTypeRefs(id) {
+  Object.keys(P.edits).forEach(function (o) { if (P.edits[o].type === id) { delete P.edits[o].type; clean(o); } });
+  Object.keys(P.propTypes).forEach(function (k) { if (P.propTypes[k] === id) delete P.propTypes[k]; });
+  Object.keys(P.mdTypes).forEach(function (k) {
+    var r = P.mdTypes[k];
+    if (r === id) { delete P.mdTypes[k]; return; }
+    if (r && typeof r === 'object') { if (r.shelf === id) delete r.shelf; if (r.pipe === id) delete r.pipe; if (!Object.keys(r).length) delete P.mdTypes[k]; }
+  });
 }
 
 /* ---------- 이벤트 ---------- */
@@ -1064,6 +1527,17 @@ viewport.addEventListener('mousedown', function (e) {
     if (e.ctrlKey || e.metaKey) { if (sel.has(o)) sel.delete(o); else sel.add(o); }
     else if (e.shiftKey) sel.add(o);
     else sel = new Set([o]);
+    afterSel();
+    e.preventDefault();
+    return;
+  }
+  var pe = e.target.closest('.prop');
+  if (pe) {
+    var pk = pe.getAttribute('data-pk'), L = CUR_L;
+    var os = P.mds[cur].items.filter(function (it) { return L.info[it.o] && L.info[it.o].prop === pk; }).map(function (it) { return it.o; });
+    if (!os.length) { toast('이 선반/고리에는 상품이 없어요'); e.preventDefault(); return; }
+    if (!(e.ctrlKey || e.metaKey || e.shiftKey)) sel = new Set();
+    os.forEach(function (o) { sel.add(o); });
     afterSel();
     e.preventDefault();
     return;
@@ -1112,7 +1586,7 @@ viewport.addEventListener('wheel', function (e) {
   fitMode = null;
   applyZoom();
 }, { passive: false });
-window.addEventListener('resize', function () { if (fitMode && CUR_L) fit(fitMode); });
+window.addEventListener('resize', function () { if (fitMode && CUR_L && VIEW === 'pog') fit(fitMode); });
 
 side.addEventListener('click', function (e) {
   var r = e.target.closest('.mdrow');
@@ -1128,8 +1602,8 @@ toolbar.addEventListener('click', function (e) {
 });
 toolbar.addEventListener('change', function (e) {
   var md = P.mds[cur];
-  if (e.target.id === 'md-type') {
-    if (e.target.value === 'auto') delete P.mdTypes[md.mdidx]; else P.mdTypes[md.mdidx] = e.target.value;
+  if (e.target.id === 'md-type-shelf' || e.target.id === 'md-type-pipe') {
+    setMdRule(md, e.target.id === 'md-type-pipe' ? 'pipe' : 'shelf', e.target.value);
     changed();
   }
   if (e.target.id === 'md-done') { if (e.target.checked) P.done[md.mdidx] = true; else delete P.done[md.mdidx]; saveSoon(); renderSidebar(); }
@@ -1144,6 +1618,7 @@ panel.addEventListener('click', function (e) {
   else if (a === 'zero') setQty(os, 0);
   else if (a === 'mset') { var v = $('m-qty').value; if (v !== '') setQty(os, +v); }
   else if (a === 'same') selectSame(ITEM_INDEX[os[0]].it.code);
+  else if (a === 'selprop') { var x0 = ITEM_INDEX[os[0]], inf0 = layoutOf(x0.md).info[x0.it.o]; sel = new Set(propItems(x0.md, inf0.prop).map(function (it) { return it.o; })); afterSel(); }
   else if (a === 'only') { var c = b.getAttribute('data-code'); sel = new Set(os.filter(function (o) { return ITEM_INDEX[o].it.code === c; })); afterSel(); }
 });
 panel.addEventListener('change', function (e) {
@@ -1151,6 +1626,7 @@ panel.addEventListener('change', function (e) {
   if (e.target.id === 'p-qty') setQty(os, e.target.value === '' ? null : +e.target.value);
   if (e.target.id === 'p-type') setType(os, e.target.value);
   if (e.target.id === 'm-type' && e.target.value !== '__') setType(os, e.target.value);
+  if (e.target.id === 'pr-type' && e.target.value !== '__') setPropType(os.map(function (o) { return ITEM_INDEX[o]; }).filter(Boolean), e.target.value);
 });
 panel.addEventListener('keydown', function (e) {
   if (e.key === 'Enter' && e.target.id === 'm-qty' && e.target.value !== '') setQty(Array.from(sel), +e.target.value);
@@ -1160,7 +1636,7 @@ document.addEventListener('keydown', function (e) {
   if (!P) return;
   if (document.querySelector('.modal-bg.show')) { if (e.key === 'Escape') { document.querySelectorAll('.modal-bg.show').forEach(function (m) { if (!m.dataset.locked) m.classList.remove('show'); }); } return; }
   var tag = (document.activeElement && document.activeElement.tagName) || '';
-  if (/INPUT|SELECT|TEXTAREA/.test(tag)) return;
+  if (/INPUT|SELECT|TEXTAREA/.test(tag) || VIEW !== 'pog') return;
   if (e.key === '+' || e.key === '=') { stepSel(1); e.preventDefault(); }
   else if (e.key === '-' || e.key === '_') { stepSel(-1); e.preventDefault(); }
   else if (e.key === 'Escape') { sel = new Set(); afterSel(); }
@@ -1169,10 +1645,11 @@ document.addEventListener('keydown', function (e) {
 $('search').addEventListener('input', function () {
   searchQ = this.value.trim().toLowerCase();
   if (!P) return;
+  if (VIEW === 'table') { renderTable(); return; }
   updateItems(); renderSidebar();
 });
 $('search').addEventListener('keydown', function (e) {
-  if (e.key !== 'Enter' || !P || !searchQ) return;
+  if (e.key !== 'Enter' || !P || !searchQ || VIEW !== 'pog') return;
   if (mdStats(P.mds[cur]).hit) return;
   for (var i = 0; i < P.mds.length; i++) { if (mdStats(P.mds[i]).hit) { switchMd(i); return; } }
   toast('검색 결과가 없어요');
@@ -1183,16 +1660,42 @@ $('btn-settings').onclick = function () { renderSettings(); openModal('m-setting
 $('btn-export').onclick = function () { if (P) exportProgress(); };
 $('btn-final').onclick = openFinal;
 $('final-dl').onclick = function () { exportXlsx(); closeModal('m-final'); };
+$('cust-add').onclick = function () {
+  $('cust-list').insertAdjacentHTML('beforeend', custRow('c_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), '', ''));
+  var rows = $('cust-list').querySelectorAll('.cust-row');
+  rows[rows.length - 1].querySelector('.cn').focus();
+};
+$('cust-list').addEventListener('click', function (e) { var b = e.target.closest('[data-del-cust]'); if (b) b.closest('.cust-row').remove(); });
 $('set-save').onclick = function () {
+  var custom = [], bad = false;
+  $('cust-list').querySelectorAll('.cust-row').forEach(function (r) {
+    var label = r.querySelector('.cn').value.trim(), d = +r.querySelector('.cd2').value || 0;
+    if (!label && !d) return;
+    if (!label || d <= 0) { bad = true; return; }
+    custom.push({ id: r.getAttribute('data-id'), label: label, depth: d });
+  });
+  if (bad) { alert('추가한 종류는 이름과 깊이(mm)를 모두 입력해 주세요.'); return; }
+  var removed = SET.custom.filter(function (c) { return !custom.some(function (x) { return x.id === c.id; }); });
+  var used = removed.reduce(function (n, c) { return n + typeUsage(c.id); }, 0);
+  if (used && !confirm('삭제한 종류를 ' + used + '곳에서 쓰고 있어요. 삭제하면 그곳은 선반·매대 설정을 따르게 돼요. 계속할까요?')) return;
+  if (P) removed.forEach(function (c) { dropTypeRefs(c.id); });
+  removed.forEach(function (c) { delete SET.depth[c.id]; });
+  SET.custom = custom.map(function (c) { SET.depth[c.id] = c.depth; return { id: c.id, label: c.label }; });
+  rebuildTypes();
   document.querySelectorAll('#set-grid [data-d]').forEach(function (i) { SET.depth[i.getAttribute('data-d')] = Math.max(0, +i.value || 0); });
   SET.cap = Math.max(1, +$('s-cap').value || 20);
   SET.cardDefault = Math.max(1, +$('s-card').value || 1);
   SET.fileQty = Math.max(1, +$('s-file').value || 3);
   saveSettings(); closeModal('m-settings');
-  if (P) { changed(); }
+  if (P) { changed(); if (VIEW === 'table') renderTable(); }
   toast('설정을 저장했어요');
 };
-$('set-reset').onclick = function () { SET = JSON.parse(JSON.stringify(DEF_SET)); renderSettings(); };
+// 기본값: 기본 종류의 깊이·상한만 되돌리고, 추가한 종류는 그대로 둠
+$('set-reset').onclick = function () {
+  var d = DEF_SET.depth;
+  document.querySelectorAll('#set-grid [data-d]').forEach(function (i) { i.value = d[i.getAttribute('data-d')]; });
+  $('s-cap').value = DEF_SET.cap; $('s-card').value = DEF_SET.cardDefault; $('s-file').value = DEF_SET.fileQty;
+};
 $('saved').addEventListener('click', function (e) {
   var op = e.target.getAttribute('data-open'), del = e.target.getAttribute('data-del');
   if (op) { try { P = JSON.parse(localStorage.getItem(op)); cur = 0; afterLoad(); } catch (x) { alert('불러오지 못했어요.'); } }
@@ -1219,7 +1722,7 @@ window.addEventListener('message', function (e) {
 /* ---------- 시작 ---------- */
 (function start() {
   var last = localStorage.getItem('pogfl:last');
-  if (last) { var p = readProject(last); if (p && p.mds) { P = p; P.edits = P.edits || {}; P.mdTypes = P.mdTypes || {}; P.done = P.done || {}; afterLoad(); } }
+  if (last) { var p = readProject(last); if (p && p.mds) { P = p; afterLoad(); } }
   if (!P) renderAll();
   if (window.opener) { try { window.opener.postMessage({ type: 'POG_FL_READY' }, '*'); } catch (e) {} }
 })();
