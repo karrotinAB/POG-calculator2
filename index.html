@@ -122,8 +122,8 @@ table.kv td:first-child{color:var(--g5);width:78px;white-space:nowrap}
 .mb{padding:18px 20px}
 .mf{padding:12px 20px;border-top:1px solid var(--g2);display:flex;gap:8px;justify-content:flex-end}
 .steps{list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:8px;margin:12px 0}
-.steps li{counter-increment:s;display:flex;gap:10px;line-height:1.5;color:var(--g7)}
-.steps li::before{content:counter(s);background:var(--ol);color:var(--o);font-weight:800;font-size:11px;min-width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.steps li{counter-increment:s;position:relative;padding-left:30px;line-height:1.6;color:var(--g7)}
+.steps li::before{content:counter(s);position:absolute;left:0;top:1px;background:var(--ol);color:var(--o);font-weight:800;font-size:11px;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center}
 .bm-box{border:2px dashed var(--o);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#FFFBF7}
 .bm-link{background:var(--o);color:#fff;padding:10px 16px;border-radius:7px;font-weight:800;text-decoration:none;white-space:nowrap;cursor:grab}
 .warnbox{background:var(--rl);color:var(--red);border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.6;margin-top:10px}
@@ -183,8 +183,8 @@ table.kv td:first-child{color:var(--g5);width:78px;white-space:nowrap}
       </div>
       <ol class="steps">
         <li>pog.artbox.kr 로그인 → 매장의 <b>매대목록 화면(main.aspx)</b>으로 이동</li>
-        <li>저장한 즐겨찾기 클릭 → 모든 매대와 상품 상세정보(뎁스·팩킹수량·분류)를 자동으로 읽어요</li>
-        <li>끝나면 이 탭으로 자동 전송돼요. 전송이 안 되면 수집창의 <b>JSON 저장</b> 후 아래에 끌어다 놓으세요</li>
+        <li>저장한 즐겨찾기 클릭 → POG 화면 가운데에 <b>진행률 창</b>이 떠요 (매대 → 상품 상세정보 순서, 매장당 보통 2~5분)</li>
+        <li>끝나면 창의 <b>편집기로 보내기</b> 버튼을 누르세요. 안 되면 <b>JSON 저장</b> 후 아래에 끌어다 놓으세요</li>
       </ol>
       <div class="infobox">읽기 전용이에요. POG 사이트에 저장·수정 요청은 보내지 않아요. 매대 하나만 필요하면 매대 화면(md.aspx)에서 눌러도 돼요.</div>
       <div id="proto-warn"></div>
@@ -227,6 +227,12 @@ table.kv td:first-child{color:var(--g5);width:78px;white-space:nowrap}
    이 함수 안에서는 앱의 다른 변수를 쓰면 안 됨
    ===================================================================== */
 async function pogCollector(APP) {
+  try { await pogCollectorMain(APP); }
+  catch (err) {
+    window.__pogflRunning = false;
+    alert('수집 중 오류가 났어요: ' + (err && err.message || err) + '\n화면을 새로고침한 뒤 다시 시도해 주세요.');
+  }
+  async function pogCollectorMain(APP) {
   var T = function (s) { return String(s || '').replace(/\s+/g, ' ').trim(); };
   var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
   if (location.hostname.indexOf('pog.artbox.kr') < 0) { alert('pog.artbox.kr 매장 페이지에서 실행해 주세요.'); return; }
@@ -234,13 +240,34 @@ async function pogCollector(APP) {
   window.__pogflRunning = true;
   var Q = new URLSearchParams(location.search);
   var store = { code: Q.get('iv_store_code') || '', name: Q.get('iv_store_name') || '', saup: Q.get('iv_saup_gubn') || '00' };
-  var appWin = null;
-  try { appWin = window.open(APP, 'pog_first_list'); } catch (e) {}
+  var appWin = null, stopped = false, t0all = Date.now(), origTitle = document.title;
   var box = document.createElement('div');
-  box.style.cssText = 'position:fixed;right:20px;bottom:20px;z-index:2147483647;background:#1f1f1f;color:#fff;padding:16px 18px;border-radius:12px;font:13px/1.6 sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.35);width:340px';
+  box.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2147483647;background:#1f1f1f;color:#fff;padding:22px 24px;border-radius:14px;font:14px/1.6 sans-serif;box-shadow:0 0 0 100vmax rgba(0,0,0,.35),0 10px 40px rgba(0,0,0,.4);width:400px;max-width:90vw';
   document.body.appendChild(box);
-  var say = function (h) { box.innerHTML = '<div style="font-weight:700;color:#F9A15C;margin-bottom:6px">초도리스트 POG 수집</div>' + h; };
-  say('준비 중...');
+  if (!document.getElementById('pogfl-kf')) {
+    var st = document.createElement('style'); st.id = 'pogfl-kf';
+    st.textContent = '@keyframes pogflspin{to{transform:rotate(360deg)}}';
+    document.head.appendChild(st);
+  }
+  var HEAD = '<div style="font-weight:800;color:#F9A15C;font-size:15px;margin-bottom:10px">초도리스트 POG 수집</div>';
+  var SPIN = '<span style="display:inline-block;width:14px;height:14px;border:2px solid #F9A15C;border-top-color:transparent;border-radius:50%;animation:pogflspin .8s linear infinite;vertical-align:-2px;margin-right:8px"></span>';
+  var fmtSec = function (ms) { var s = Math.max(0, Math.round(ms / 1000)); return s < 60 ? s + '초' : Math.floor(s / 60) + '분 ' + (s % 60) + '초'; };
+  var say = function (h) { box.innerHTML = HEAD + h; };
+  var progress = function (stage, done, total, sub, stageStart) {
+    var pct = total ? Math.round(done / total * 100) : 0;
+    var eta = '';
+    if (done > 0 && total > done) eta = ' · 남은 시간 약 ' + fmtSec((Date.now() - stageStart) / done * (total - done));
+    document.title = '[' + pct + '%] 수집 중 · ' + origTitle;
+    box.innerHTML = HEAD +
+      '<div>' + SPIN + '<b>' + stage + '</b> ' + done + ' / ' + total + '</div>' +
+      '<div style="height:8px;background:#444;border-radius:4px;margin:10px 0 6px;overflow:hidden"><div style="height:100%;width:' + pct + '%;background:#F47B20;transition:width .3s"></div></div>' +
+      '<div style="color:#bbb;font-size:12px;min-height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (sub || '') + '</div>' +
+      '<div style="color:#888;font-size:12px;margin-top:4px">경과 ' + fmtSec(Date.now() - t0all) + eta + '</div>' +
+      '<div style="color:#888;font-size:12px;margin-top:8px">이 탭을 닫거나 다른 페이지로 이동하지 마세요.</div>' +
+      '<button id="pogfl-stop" style="margin-top:10px;padding:5px 12px;border:none;border-radius:6px;background:#555;color:#fff;cursor:pointer">중지</button>';
+    box.querySelector('#pogfl-stop').onclick = function () { stopped = true; this.textContent = '중지하는 중...'; };
+  };
+  say(SPIN + '매대 목록 확인 중...');
   var selText = function (s) { return s && s.options && s.options[s.selectedIndex] ? T(s.options[s.selectedIndex].text) : ''; };
   var gv = function (d, id) { var e = d.getElementById(id); return e ? e.value : ''; };
   var px = function (v) { return Math.round((parseFloat(v) || 0) * 10) / 10; };
@@ -358,9 +385,10 @@ async function pogCollector(APP) {
     return;
   }
 
-  var results = [];
+  var results = [], tMd = Date.now();
   for (var i = 0; i < mds.length; i++) {
-    say('📦 매대 읽는 중 ' + (i + 1) + ' / ' + mds.length + '<br><span style="color:#bbb">' + mds[i].mdname + '</span>');
+    if (stopped) break;
+    progress('📦 매대 읽는 중', i, mds.length, mds[i].mdname, tMd);
     var det;
     try { det = single ? extract(document) : await loadMd(mds[i].url); } catch (e) { det = { error: String(e) }; }
     results.push(Object.assign({}, mds[i], { detail: det }));
@@ -370,23 +398,26 @@ async function pogCollector(APP) {
   results.forEach(function (r) {
     (r.detail.items || []).forEach(function (it) { if (it.code && !seen[it.code]) { seen[it.code] = 1; codes.push(it.code); } });
   });
-  var products = {}, k = 0, done = 0;
+  var products = {}, k = 0, done = 0, tPr = Date.now();
   async function worker() {
-    while (k < codes.length) {
+    while (k < codes.length && !stopped) {
       var c = codes[k++];
       try { products[c] = await fetchInfo(c); } catch (e) { products[c] = { _error: String(e.message || e) }; }
       done++;
-      if (done % 5 === 0 || done === codes.length) say('🔎 상품 상세정보 읽는 중 ' + done + ' / ' + codes.length);
+      if (done % 3 === 0 || done === codes.length) progress('🔎 상품 상세정보 읽는 중', done, codes.length, '뎁스 · 팩킹수량 · 분류', tPr);
     }
   }
-  say('🔎 상품 상세정보 읽는 중 0 / ' + codes.length);
-  await Promise.all([worker(), worker(), worker(), worker(), worker()]);
+  if (!stopped) {
+    progress('🔎 상품 상세정보 읽는 중', 0, codes.length, '뎁스 · 팩킹수량 · 분류', tPr);
+    await Promise.all([worker(), worker(), worker(), worker(), worker()]);
+  }
+  document.title = origTitle;
 
   var payload = { type: 'POG_FL_DATA', version: 1, collectedAt: new Date().toISOString(), store: store, mds: results, products: products };
   var acked = false;
   var bad = results.filter(function (r) { return r.detail.error; }).length;
   var perr = codes.filter(function (c) { return products[c] && products[c]._error; }).length;
-  var summary = '매대 ' + results.length + '개 · 상품 ' + codes.length + '종' + (bad ? '<br>⚠️ 매대 읽기 실패 ' + bad + '개' : '') + (perr ? '<br>⚠️ 상세정보 실패 ' + perr + '종' : '');
+  var summary = (stopped ? '⏹ 중간에 중지됨 (읽은 것까지만 저장)<br>' : '') + '매대 ' + results.length + ' / ' + mds.length + '개 · 상품 ' + codes.length + '종 · ' + fmtSec(Date.now() - t0all) + (bad ? '<br>⚠️ 매대 읽기 실패 ' + bad + '개' : '') + (perr ? '<br>⚠️ 상세정보 실패 ' + perr + '종' : '');
   function send(w) { try { if (w && !w.closed) { w.postMessage(payload, '*'); return true; } } catch (e) {} return false; }
   function saveJson() {
     var b = new Blob([JSON.stringify(payload)], { type: 'application/json' });
@@ -397,7 +428,7 @@ async function pogCollector(APP) {
   }
   var bs = 'padding:5px 10px;border:none;border-radius:6px;font-weight:700;cursor:pointer;margin-right:6px;margin-top:4px';
   function render() {
-    say((acked ? '✅ 편집기로 전송 완료' : '✅ 수집 완료') + '<br>' + summary + '<div style="margin-top:10px"><button data-a="open" style="' + bs + ';background:#F47B20;color:#fff">편집기 열기</button><button data-a="json" style="' + bs + '">JSON 저장</button><button data-a="close" style="' + bs + ';background:#555;color:#fff">닫기</button></div>');
+    say((acked ? '✅ 편집기로 전송 완료! 편집기 탭을 확인하세요.' : '✅ 수집 완료 — 아래 버튼을 눌러 편집기로 보내세요') + '<br>' + summary + '<div style="margin-top:12px"><button data-a="open" style="' + bs + ';background:#F47B20;color:#fff;font-size:14px;padding:8px 14px">' + (acked ? '편집기 열기' : '편집기로 보내기 →') + '</button><button data-a="json" style="' + bs + '">JSON 저장</button><button data-a="close" style="' + bs + ';background:#555;color:#fff">닫기</button></div>');
     [].forEach.call(box.querySelectorAll('button[data-a]'), function (b) {
       b.onclick = function () {
         var a = b.getAttribute('data-a');
@@ -413,9 +444,9 @@ async function pogCollector(APP) {
     if (dd.type === 'POG_FL_ACK' && !acked) { acked = true; render(); }
   });
   render();
-  var tries = 0;
-  var tm = setInterval(function () { if (acked || ++tries > 25) { clearInterval(tm); return; } send(appWin); }, 800);
+  setInterval(function () { if (!acked && appWin) send(appWin); }, 800);
   window.__pogflRunning = false;
+  }
 }
 
 /* =====================================================================
