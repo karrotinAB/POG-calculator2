@@ -1218,8 +1218,9 @@ function tvRows() {
     var g = {}, order = [];
     cells.forEach(function (c) {
       var r = g[c.code];
-      if (!r) { r = g[c.code] = { code: c.code, name: c.name, cat1: c.cat1, cat2: c.cat2, cat3: c.cat3, d: c.d, pack: c.pack, price: c.price, img: c.img, cnt: 0, qty: 0, unk: 0, edn: 0, mdset: {}, mdl: [] }; order.push(c.code); }
+      if (!r) { r = g[c.code] = { code: c.code, name: c.name, cat1: c.cat1, cat2: c.cat2, cat3: c.cat3, d: c.d, pack: c.pack, price: c.price, img: c.img, cnt: 0, qty: 0, unk: 0, edn: 0, mdset: {}, mdl: [], os: [] }; order.push(c.code); }
       r.cnt++;
+      r.os.push(c.o);
       if (c.qty == null) r.unk++; else r.qty += c.qty;
       if (c.ed) r.edn++;
       if (!r.mdset[c.md.mdidx]) { r.mdset[c.md.mdidx] = 1; r.mdl.push(c.mdname); }
@@ -1245,7 +1246,7 @@ function tvCell(c, r) {
   var v = r[c.k];
   if (c.k === 'img') return '<td>' + (r.img ? '<img src="' + esc(r.img) + '" loading="lazy" onerror="this.style.visibility=\'hidden\'">' : '') + '</td>';
   if (c.k === 'qty' && TV.mode === 'cell') return '<td class="n"><input class="tq" type="number" min="0" data-o="' + esc(r.o) + '" value="' + (v == null ? '' : v) + '" placeholder="?"></td>';
-  if (c.k === 'qty' && TV.mode === 'prod') return '<td class="n"><b>' + fmt(v) + '</b>' + (r.unk ? ' <span class="unk">+?</span>' : '') + '</td>';
+  if (c.k === 'qty' && TV.mode === 'prod') return '<td class="n">' + (r.unk ? '<span class="unk" title="수량 미정 칸이 있어요">+? </span>' : '') + '<input class="tq tqp" type="number" min="0" data-code="' + esc(r.code) + '" value="' + v + '" title="고치면 이 상품의 칸들에 나눠 넣어요"></td>';
   if (c.k === 'rec' && v == null) return '<td class="n unk">미정</td>';
   if (c.k === 'note' && r.unk) return '<td class="unk">' + esc(v) + '</td>';
   if (c.k === 'tier') return '<td class="n">' + (v ? v + '단' : '') + '</td>';
@@ -1255,8 +1256,24 @@ function tvCell(c, r) {
 function tvRowHtml(r, i, cols) {
   var key = TV.mode === 'cell' ? r.o : r.code;
   var on = TV.pick && (TV.mode === 'cell' ? TV.pick.o === r.o : TV.pick.code === r.code);
-  var cls = (on ? 'on ' : '') + (TV.mode === 'cell' && r.ed ? 'ed ' : '') + ((TV.mode === 'cell' ? (r.qty === 0 || r.tid === 'none') : (r.qty === 0 && !r.unk)) ? 'ex' : '');
+  var cls = (on ? 'on ' : '') + ((TV.mode === 'cell' ? r.ed : r.edn) ? 'ed ' : '') + ((TV.mode === 'cell' ? (r.qty === 0 || r.tid === 'none') : (r.qty === 0 && !r.unk)) ? 'ex' : '');
   return '<tr data-k="' + esc(key) + '" data-code="' + esc(r.code) + '" class="' + cls + '"><td class="rn">' + (i + 1) + '</td>' + cols.map(function (c) { return tvCell(c, r); }).join('') + '</tr>';
+}
+// 상품별 총수량을 칸들에 나눠 넣기: 0개(제외)로 둔 칸은 그대로, 나머지는 지금 수량 비율대로 (팩킹 단위로 나눠떨어지면 팩킹 단위로)
+function distributeTotal(os, total) {
+  var xs = os.map(function (o) { var x = ITEM_INDEX[o]; return { o: o, x: x, q: qtyOf(x.md, x.it) }; });
+  var pool = xs.filter(function (c) { return c.q !== 0; });
+  if (!pool.length) pool = xs;
+  var pack = prodOf(pool[0].x.it).pack || 1;
+  var unit = pack > 1 && total % pack === 0 ? pack : 1, units = total / unit;
+  var w = pool.map(function (c) { return c.q > 0 ? c.q : (recOf(c.x.md, c.x.it).qty || 1); });
+  var W = w.reduce(function (a, b) { return a + b; }, 0);
+  var alloc = w.map(function (wi) { return Math.floor(units * wi / W); });
+  var left = units - alloc.reduce(function (a, b) { return a + b; }, 0);
+  var order = w.map(function (wi, i) { return i; }).sort(function (a, b) { return (units * w[b] / W - alloc[b]) - (units * w[a] / W - alloc[a]) || a - b; });
+  for (var i = 0; left > 0; i = (i + 1) % order.length, left--) alloc[order[i]]++;
+  pool.forEach(function (c, i) { edit(c.o).qty = alloc[i] * unit; });
+  changed();
 }
 function renderTable() {
   if (!P) return;
@@ -1294,7 +1311,7 @@ function tvExport() {
 }
 function renderTablePanel() {
   if (!TV.pick) {
-    panel.innerHTML = '<div class="help"><b>행을 클릭</b>하면 상품 상세정보와 POG 위치가 여기 나와요.<br><br>• <b>상품별</b>: 매장 전체에서 상품마다 합친 수량<br>• <b>칸별</b>: POG 칸 하나하나 — 최종수량을 바로 고칠 수 있어요 (<kbd>Enter</kbd>로 다음 줄)<br>• 제목 칸을 누르면 정렬, 위쪽 검색창으로 찾기<br>• 위치를 누르면 POG 보기로 가서 그 칸을 보여줘요</div>';
+    panel.innerHTML = '<div class="help"><b>행을 클릭</b>하면 상품 상세정보와 POG 위치가 여기 나와요.<br><br>• <b>상품별</b>: 매장 전체에서 상품마다 합친 수량<br>• 상품별 <b>총수량</b>도 고칠 수 있어요 — 그 상품의 칸들에 지금 수량 비율대로 나눠 넣어요 (0개로 뺀 칸은 그대로 · 비우면 추천값으로)<br>• <b>칸별</b>: POG 칸 하나하나 — 최종수량을 바로 고칠 수 있어요 (<kbd>Enter</kbd>로 다음 줄)<br>• 제목 칸을 누르면 정렬, 위쪽 검색창으로 찾기<br>• 위치를 누르면 POG 보기로 가서 그 칸을 보여줘요</div>';
     return;
   }
   var code = TV.pick.code;
@@ -1348,6 +1365,16 @@ tview.addEventListener('click', function (e) {
 tview.addEventListener('change', function (e) {
   if (e.target.id === 'tv-md') { TV.md = e.target.value; renderTable(); }
   else if (e.target.id === 'tv-only') { TV.only = e.target.value; renderTable(); }
+  else if (e.target.classList.contains('tqp')) {
+    var code = e.target.getAttribute('data-code'), row = tvRows().find(function (r) { return r.code === code; });
+    if (!row) return;
+    var tv = e.target.value;
+    if (tv === '') { row.os.forEach(function (o) { var x = P.edits[o]; if (x) { delete x.qty; clean(o); } }); changed(); }
+    else distributeTotal(row.os, Math.max(0, Math.round(+tv)));
+    // 이 줄만 다시 그림 (다음 줄 포커스 유지)
+    var nr = tvRows().find(function (r) { return r.code === code; }), trp = e.target.closest('tr');
+    if (nr && trp) trp.outerHTML = tvRowHtml(nr, +trp.cells[0].textContent - 1, TV_COLS.prod);
+  }
   else if (e.target.classList.contains('tq')) {
     var o = e.target.getAttribute('data-o'), v = e.target.value;
     setQty([o], v === '' ? null : +v);
