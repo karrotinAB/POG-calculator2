@@ -25,6 +25,7 @@ header{height:56px;background:var(--o);color:#fff;display:flex;align-items:cente
 .hbtn{border:1.5px solid rgba(255,255,255,.6);background:rgba(255,255,255,.12);color:#fff;border-radius:6px;padding:6px 11px;font-size:12px;font-weight:700;white-space:nowrap}
 .hbtn:hover{background:rgba(255,255,255,.25)}
 .hbtn.solid{background:#fff;color:var(--o2);border-color:#fff}
+.hbtn.warn{background:#fff3c4;color:#7a5200;border-color:#fff3c4}
 .save-status{font-size:11px;opacity:.85;white-space:nowrap;min-width:70px;text-align:right}
 
 .layout{display:grid;grid-template-columns:240px 1fr 330px;height:calc(100vh - 56px)}
@@ -203,6 +204,7 @@ table.xt .unk{color:var(--red);font-weight:700}
   <div class="hstats" id="hstats"></div>
   <input class="search" id="search" placeholder="상품코드 / 상품명 검색">
   <span class="save-status" id="save-status"></span>
+  <button class="hbtn warn" id="btn-prod" style="display:none" title="상품 뎁스·팩킹수량이 없는 상품만 POG 사이트에서 가져와요">상품 상세정보 채우기</button>
   <button class="hbtn" id="btn-setup">새로 수집</button>
   <button class="hbtn" id="btn-settings">설정</button>
   <button class="hbtn" id="btn-export">진행상황 내보내기</button>
@@ -235,6 +237,7 @@ table.xt .unk{color:var(--red);font-weight:700}
         <li>저장한 즐겨찾기 클릭 → POG 화면 가운데에 <b>진행률 창</b>이 떠요 (매대 → 상품 상세정보 순서, 매장당 보통 2~5분)</li>
         <li>끝나면 창의 <b>편집기로 보내기</b> 버튼을 누르세요. 안 되면 <b>JSON 저장</b> 후 아래에 끌어다 놓으세요</li>
       </ol>
+      <div class="infobox"><b>Global POG에서 받은 파일</b>(온라인 POG → 'POG 계산기용 파일 받기')도 아래에 끌어다 놓으면 돼요. 이 파일에는 상품 뎁스·팩킹수량이 없어서, 올린 뒤 위쪽의 <b>상품 상세정보 채우기</b>를 눌러 상품 정보만 가져오면 돼요 (매대는 다시 안 읽어요).</div>
       <div class="infobox">읽기 전용이에요. POG 사이트에 저장·수정 요청은 보내지 않아요. 매대 하나만 필요하면 매대 화면(md.aspx)에서 눌러도 돼요.</div>
       <div id="proto-warn"></div>
       <div class="drop" id="drop">
@@ -321,6 +324,47 @@ async function pogCollector(APP) {
     box.querySelector('#pogfl-stop').onclick = function () { stopped = true; this.textContent = '중지하는 중...'; };
   };
   say(SPIN + '매대 목록 확인 중...');
+
+  // 편집기의 '상품 상세정보 채우기'로 연 창이면: 매대는 다시 읽지 않고 상품 상세정보만 가져와서 편집기로 보냄
+  // (Global POG에서 받은 파일처럼 상품 정보가 없는 데이터를 채울 때)
+  var APP_ORIGIN = ''; try { APP_ORIGIN = new URL(APP).origin; } catch (e) {}
+  var need = await (function askNeed() {
+    return new Promise(function (res) {
+      var op = window.opener;
+      if (!op || !APP_ORIGIN) return res(null);
+      var fin = false;
+      var on = function (e) {
+        var d = e.data;
+        if (e.source !== op || e.origin !== APP_ORIGIN || !d || d.type !== 'POG_FL_NEED') return;
+        fin = true; window.removeEventListener('message', on); res(d);
+      };
+      window.addEventListener('message', on);
+      try { op.postMessage({ type: 'POG_FL_ASK' }, APP_ORIGIN); } catch (e) { window.removeEventListener('message', on); return res(null); }
+      setTimeout(function () { if (!fin) { window.removeEventListener('message', on); res(null); } }, 1500);
+    });
+  })();
+  if (need && need.codes && need.codes.length) {
+    var pc = need.codes.slice(), pprod = {}, pk = 0, pdone = 0, tP = Date.now();
+    var pworker = async function () {
+      while (pk < pc.length && !stopped) {
+        var c = pc[pk++];
+        try { pprod[c] = await fetchInfo(c); } catch (e) { pprod[c] = { _error: String(e.message || e) }; }
+        pdone++;
+        if (pdone % 3 === 0 || pdone === pc.length) progress('🔎 상품 상세정보만 읽는 중', pdone, pc.length, '뎁스 · 팩킹수량 · 분류', tP);
+      }
+    };
+    progress('🔎 상품 상세정보만 읽는 중', 0, pc.length, '뎁스 · 팩킹수량 · 분류', tP);
+    await Promise.all([pworker(), pworker(), pworker(), pworker(), pworker()]);
+    document.title = origTitle;
+    var perr2 = pc.filter(function (c) { return pprod[c] && pprod[c]._error; }).length;
+    var sent = false;
+    try { window.opener.postMessage({ type: 'POG_FL_PRODUCTS', store: need.store || '', products: pprod }, APP_ORIGIN); sent = true; } catch (e) {}
+    say((sent ? '✅ 편집기로 상품 정보를 보냈어요. 편집기 탭을 확인하세요.' : '⚠️ 편집기 창을 찾지 못했어요. 편집기에서 다시 눌러주세요.') + '<br>상품 ' + Object.keys(pprod).length + '종' + (perr2 ? ' · ⚠️ 못 읽은 상품 ' + perr2 + '종' : '') + (stopped ? '<br>⏹ 중간에 중지됨' : '') + ' · ' + fmtSec(Date.now() - t0all) +
+      '<div style="margin-top:10px"><button id="pogfl-x" style="padding:5px 12px;border:none;border-radius:6px;background:#555;color:#fff;cursor:pointer">닫기</button></div>');
+    box.querySelector('#pogfl-x').onclick = function () { box.remove(); };
+    window.__pogflRunning = false;
+    return;
+  }
   var selText = function (s) { return s && s.options && s.options[s.selectedIndex] ? T(s.options[s.selectedIndex].text) : ''; };
   var gv = function (d, id) { var e = d.getElementById(id); return e ? e.value : ''; };
   var px = function (v) { return Math.round((parseFloat(v) || 0) * 10) / 10; };
@@ -874,6 +918,7 @@ function mdStats(md) {
 
 /* ---------- 렌더 ---------- */
 function renderAll() {
+  try { updateProdBtn(); } catch (e) {}
   var has = !!P;
   document.querySelector('.layout').style.visibility = has ? 'visible' : 'hidden';
   if (!has) { openSetup(true); return; }
@@ -1713,11 +1758,49 @@ $('file-in').addEventListener('change', function () { if (this.files[0]) { readF
 
 window.addEventListener('message', function (e) {
   var d = e.data;
-  if (!d || d.type !== 'POG_FL_DATA') return;
+  if (!d || !/^POG_FL_/.test(d.type || '')) return;
   if (!/artbox\.kr$/.test((e.origin || '').replace(/^https?:\/\//, '').split(':')[0])) return;
+  if (d.type === 'POG_FL_ASK') { // 상품 정보만 가져오는 수집기가 '무엇이 필요한지' 물어봄
+    if (WAIT_PRODUCTS && P) try { e.source.postMessage({ type: 'POG_FL_NEED', codes: WAIT_PRODUCTS, store: P.store.code || '' }, e.origin); } catch (x) {}
+    return;
+  }
+  if (d.type === 'POG_FL_PRODUCTS') { fillProducts(d); return; }
+  if (d.type !== 'POG_FL_DATA') return;
   try { ingest(d, '📥 '); } catch (err) { console.error(err); alert('데이터를 처리하지 못했어요: ' + err.message); }
   try { e.source.postMessage({ type: 'POG_FL_ACK' }, '*'); } catch (x) {}
 });
+
+/* ---------- 상품 상세정보 채우기 ----------
+   Global POG에서 받은 파일처럼 상품 정보(뎁스·팩킹수량·분류)가 없을 때: POG 사이트 창을 열고 거기서 수집 즐겨찾기를 누르면
+   매대는 다시 읽지 않고 빠진 상품 정보만 가져와서 여기로 보냄 */
+var WAIT_PRODUCTS = null;
+function missingCodes() {
+  if (!P) return [];
+  return Object.keys(CODE_INDEX).filter(function (c) { var p = P.products && P.products[c]; return c && (!p || p.error); });
+}
+function updateProdBtn() {
+  var b = $('btn-prod'); if (!b) return;
+  var n = missingCodes().length;
+  b.style.display = n ? '' : 'none';
+  b.textContent = '상품 상세정보 채우기 (' + fmt(n) + '종)';
+}
+$('btn-prod').onclick = function () {
+  var codes = missingCodes();
+  if (!codes.length) { toast('빠진 상품 정보가 없어요'); return; }
+  WAIT_PRODUCTS = codes;
+  window.open('https://pog.artbox.kr/', 'pog_site');
+  alert('POG 사이트 창을 열었어요.\n\n1. 열린 창에서 로그인하세요 (이미 로그인돼 있으면 그대로)\n2. 즐겨찾기의 \'초도리스트 POG 수집\'을 누르세요\n\n→ 매대는 다시 읽지 않고, 상품 정보 ' + fmt(codes.length) + '종만 가져와서 여기로 보내요.\n(이 창을 닫지 마세요)');
+};
+function fillProducts(d) {
+  if (!P) return;
+  if (d.store && P.store.code && String(d.store) !== String(P.store.code)) { alert('다른 매장의 상품 정보라서 넣지 않았어요.'); return; }
+  P.products = P.products || {};
+  var n = 0, bad = 0;
+  Object.keys(d.products || {}).forEach(function (c) { var p = normProduct(c, d.products[c]); P.products[c] = p; if (p.error) bad++; else n++; });
+  WAIT_PRODUCTS = null;
+  saveNow(); renderAll();
+  toast('📥 상품 정보 ' + n + '종을 채웠어요' + (bad ? ' · 못 읽은 상품 ' + bad + '종' : ''));
+}
 
 /* ---------- 시작 ---------- */
 (function start() {
