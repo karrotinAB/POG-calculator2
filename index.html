@@ -1798,7 +1798,7 @@ $('btn-prod').onclick = function () {
   if (!codes.length) { toast('빠진 상품 정보가 없어요'); return; }
   WAIT_PRODUCTS = codes;
   window.open('https://pog.artbox.kr/', 'pog_site');
-  alert('POG 사이트 창을 열었어요.\n\n1. 열린 창에서 로그인하세요 (이미 로그인돼 있으면 그대로)\n2. 즐겨찾기의 \'초도리스트 POG 수집\'을 누르세요\n\n→ 매대는 다시 읽지 않고, 상품 정보 ' + fmt(codes.length) + '종만 가져와서 여기로 보내요.\n(이 창을 닫지 마세요)');
+  alert('POG 사이트 창을 열었어요.\n\n1. 열린 창에서 로그인하세요 (이미 로그인돼 있으면 그대로)\n2. 즐겨찾기의 \'POG 가져오기\'(Global POG)를 누르세요 (\'초도리스트 POG 수집\'도 돼요)\n\n→ 매대는 다시 읽지 않고, 상품 정보 ' + fmt(codes.length) + '종만 가져와서 여기로 보내요.\n(이 창을 닫지 마세요)');
 };
 function fillProducts(d) {
   if (!P) return;
