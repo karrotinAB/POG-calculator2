@@ -134,6 +134,11 @@ table.kv td:first-child{color:var(--g5);width:78px;white-space:nowrap}
 .steps{list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:8px;margin:12px 0}
 .steps li{counter-increment:s;position:relative;padding-left:30px;line-height:1.6;color:var(--g7)}
 .steps li::before{content:counter(s);position:absolute;left:0;top:1px;background:var(--ol);color:var(--o);font-weight:800;font-size:11px;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.howto{border:2px solid var(--o);border-radius:10px;padding:12px 16px;background:#FFFBF7;margin-bottom:12px}
+.howto .steps{margin:6px 0}
+.setup-more{margin-top:6px}
+.setup-more>summary{cursor:pointer;color:var(--g5);font-size:12.5px;padding:6px 0}
+.setup-more[open]>summary{margin-bottom:8px}
 .bm-box{border:2px dashed var(--o);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#FFFBF7}
 .bm-link{background:var(--o);color:#fff;padding:10px 16px;border-radius:7px;font-weight:800;text-decoration:none;white-space:nowrap;cursor:grab}
 .warnbox{background:var(--rl);color:var(--red);border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.6;margin-top:10px}
@@ -238,23 +243,34 @@ table.xt .unk{color:var(--red);font-weight:700}
   <div class="modal">
     <div class="mh"><h2>POG 데이터 가져오기</h2><button class="mx" data-close="m-setup" id="setup-x">×</button></div>
     <div class="mb">
-      <div class="bm-box">
-        <a class="bm-link" id="bm-link" href="#">초도리스트 POG 수집</a>
-        <div style="font-size:12px;color:var(--g5);line-height:1.6">이 버튼을 즐겨찾기 바로 드래그해서 저장하세요 (최초 1회)<br><a href="#" id="bm-copy" style="color:var(--blue)">콘솔용 코드 복사</a></div>
+      <div class="howto">
+        <div class="shdr" style="margin-top:0">📋 계산에 필요한 정보 가져오는 법</div>
+        <ol class="steps">
+          <li>위 <b>☁ Global POG 매장</b> 목록에서 매장 <b>열기</b> (Global Opening Prep 온라인 POG의 <b>🧮 초도 계산</b>으로 열어도 같아요)</li>
+          <li>계산기 위쪽에 주황 <b>상품 상세정보 채우기 (n종)</b> 버튼이 보이면 누르세요 → POG 사이트 창이 열려요</li>
+          <li>열린 POG 사이트 창에서 즐겨찾기 <b>POG 가져오기</b>를 누르세요 → 뎁스·팩킹수량·분류가 계산기로 들어와요</li>
+        </ol>
+        <div class="muted" style="font-size:12px">한 번 채우면 서버에 저장돼서 다른 사람은 다시 안 해도 돼요. 버튼이 안 보이면 이미 다 채워진 거예요.</div>
       </div>
-      <ol class="steps">
-        <li>pog.artbox.kr 로그인 → 매장의 <b>매대목록 화면(main.aspx)</b>으로 이동</li>
-        <li>저장한 즐겨찾기 클릭 → POG 화면 가운데에 <b>진행률 창</b>이 떠요 (매대 → 상품 상세정보 순서, 매장당 보통 2~5분)</li>
-        <li>끝나면 창의 <b>편집기로 보내기</b> 버튼을 누르세요. 안 되면 <b>JSON 저장</b> 후 아래에 끌어다 놓으세요</li>
-      </ol>
-      <div class="infobox"><b>Global POG 매장</b>은 위 목록에서 바로 열면 돼요 (Global Opening Prep의 '초도 계산' 버튼으로 열어도 돼요). 예전에 받은 Global POG 파일도 아래에 끌어다 놓으면 돼요. 이 파일에는 상품 뎁스·팩킹수량이 없어서, 올린 뒤 위쪽의 <b>상품 상세정보 채우기</b>를 눌러 상품 정보만 가져오면 돼요 (매대는 다시 안 읽어요).</div>
-      <div class="infobox">읽기 전용이에요. POG 사이트에 저장·수정 요청은 보내지 않아요. 매대 하나만 필요하면 매대 화면(md.aspx)에서 눌러도 돼요.</div>
-      <div id="proto-warn"></div>
-      <div class="drop" id="drop">
-        <input type="file" id="file-in" accept=".json">
-        📂 수집 JSON 또는 진행상황 파일을 끌어다 놓거나 클릭
-      </div>
-      <div class="saved" id="saved"></div>
+      <details class="setup-more" id="setup-more">
+        <summary>다른 방법: Global POG에 없는 매장을 POG 사이트에서 직접 수집 · 파일 올리기</summary>
+        <div class="bm-box">
+          <a class="bm-link" id="bm-link" href="#">초도리스트 POG 수집</a>
+          <div style="font-size:12px;color:var(--g5);line-height:1.6">이 버튼을 즐겨찾기 바로 드래그해서 저장하세요 (최초 1회)<br><a href="#" id="bm-copy" style="color:var(--blue)">콘솔용 코드 복사</a></div>
+        </div>
+        <ol class="steps">
+          <li>pog.artbox.kr 로그인 → 매장의 <b>매대목록 화면(main.aspx)</b>으로 이동</li>
+          <li>저장한 즐겨찾기 클릭 → POG 화면 가운데에 <b>진행률 창</b>이 떠요 (매대 → 상품 상세정보 순서, 매장당 보통 2~5분)</li>
+          <li>끝나면 창의 <b>편집기로 보내기</b> 버튼을 누르세요. 안 되면 <b>JSON 저장</b> 후 아래에 끌어다 놓으세요</li>
+        </ol>
+        <div class="infobox">읽기 전용이에요. POG 사이트에 저장·수정 요청은 보내지 않아요. 매대 하나만 필요하면 매대 화면(md.aspx)에서 눌러도 돼요.</div>
+        <div id="proto-warn"></div>
+        <div class="drop" id="drop">
+          <input type="file" id="file-in" accept=".json">
+          📂 수집 JSON 또는 진행상황 파일을 끌어다 놓거나 클릭
+        </div>
+        <div class="saved" id="saved"></div>
+      </details>
     </div>
   </div>
 </div>
@@ -1821,6 +1837,6 @@ function fillProducts(d) {
   if (window.opener) { try { window.opener.postMessage({ type: 'POG_FL_READY' }, '*'); } catch (e) {} }
 })();
 </script>
-<script type="module" src="cloud.js?v=1"></script>
+<script type="module" src="cloud.js?v=2"></script>
 </body>
 </html>
