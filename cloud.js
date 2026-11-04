@@ -203,10 +203,16 @@ document.addEventListener('click', e => {
   const b = e.target.closest?.('[data-cloud]'); if (!b) return;
   W.closeModal?.('m-setup'); openCloud(b.getAttribute('data-cloud'));
 });
+// 서버를 못 쓰는 계정(로그아웃·다른 레벨)은 'Global POG 매장' 안내를 숨기고 직접 수집을 펼쳐 둠
+function syncSetup() {
+  const more = $('setup-more'); if (more && !C.ok) more.open = true;
+  document.querySelector('#m-setup .howto')?.toggleAttribute('hidden', !C.ok);
+}
 // 가져오기 창을 열 때마다 목록 새로
 const _openSetup = W.openSetup;
 W.openSetup = function (locked) {
   _openSetup(locked);
+  syncSetup();
   if (!C.ok) return;
   let sec = $('cloud-sec');
   if (!sec) {
@@ -221,10 +227,10 @@ if ($('btn-setup')) $('btn-setup').onclick = () => W.openSetup(!W.P);
 /* ---------- 시작 ---------- */
 onAuthStateChanged(auth, async user => {
   C.user = user; C.ok = false;
-  if (!user) { bar(`Global Opening Prep에 로그인하면 작업이 서버에 저장되고 다른 사람과 같이 볼 수 있어요. <a href="${GLOBAL_URL}" target="_blank">로그인하러 가기</a>`, 'info'); return; }
+  if (!user) { bar(`Global Opening Prep에 로그인하면 작업이 서버에 저장되고 다른 사람과 같이 볼 수 있어요. <a href="${GLOBAL_URL}" target="_blank">로그인하러 가기</a>`, 'info'); syncSetup(); return; }
   let level = 'none';
   try { const r = await getDoc(doc(db, 'roles', me())); level = r.exists() ? r.data().level : 'none'; } catch (e) { }
-  if (!['admin', 'global', 'editor'].includes(level)) { bar('이 계정은 계산기 서버 저장을 쓸 수 없어요 (관리자·글로벌사업부만). 이 컴퓨터에만 저장돼요.', 'info'); return; }
+  if (!['admin', 'global', 'editor'].includes(level)) { bar('이 계정은 계산기 서버 저장을 쓸 수 없어요 (관리자·글로벌사업부만). 이 컴퓨터에만 저장돼요.', 'info'); syncSetup(); return; }
   C.ok = true; bar('');
   // 같이 쓰는 설정값
   try {
