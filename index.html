@@ -1176,6 +1176,7 @@ function renderPanel() {
       '<div class="recbox' + (r.qty == null ? ' bad' : '') + '">추천 수량 <b>' + (r.qty == null ? '미정' : r.qty) + '</b><div class="muted" style="color:inherit;opacity:.8">' + esc(r.expl) + '</div></div>' +
       '<div class="sec"><label>최종 수량' + (e.qty != null ? ' <span style="color:var(--blue)">· 직접 수정함</span>' : '') + '</label>' +
       '<div class="stepper"><button class="sbtn" data-act="dec">−' + step + '</button><input type="number" id="p-qty" min="0" value="' + (q == null ? '' : q) + '" placeholder="?"><button class="sbtn" data-act="inc">+' + step + '</button></div>' +
+      (p.pack > 1 ? '<div class="muted">입력한 수량은 팩킹수량 ' + p.pack + '개 단위로 반올림돼요</div>' : '') +
       '<div class="row"><button class="sbtn gray" data-act="reset" style="flex:1">추천값으로 되돌리기</button><button class="sbtn gray" data-act="zero">0개 (제외)</button></div></div>' +
       '<div class="sec"><div class="muted" style="color:var(--g7)">이 매대에 같은 상품 <b>' + inThis + '칸</b>' + (otherNames.length ? ' · 다른 매대 ' + otherNames.length + '곳 (' + esc(otherNames.slice(0, 3).join(', ')) + (otherNames.length > 3 ? ' 외' : '') + ')' : '') + '</div>' +
       (inThis > 1 ? '<button class="sbtn gray" data-act="same" style="margin-top:6px;width:100%">같은 상품 ' + inThis + '칸 모두 선택</button>' : '') + '</div>' +
@@ -1195,7 +1196,7 @@ function renderPanel() {
   panel.innerHTML =
     '<div class="pname">' + list.length + '칸 선택 · ' + order.length + '종</div>' +
     '<div class="muted">합계 ' + fmt(totQ) + '개' + (unk ? ' · <span style="color:var(--red)">미정 ' + unk + '칸</span>' : '') + '</div>' +
-    '<div class="sec"><label>수량 한 번에 입력 (선택한 칸마다)</label><div class="row"><input type="number" id="m-qty" min="0" placeholder="예: 6"><button class="sbtn fill" data-act="mset">적용</button></div>' +
+    '<div class="sec"><label>수량 한 번에 입력 (선택한 칸마다 · 팩킹수량 단위로 반올림)</label><div class="row"><input type="number" id="m-qty" min="0" placeholder="예: 6"><button class="sbtn fill" data-act="mset">적용</button></div>' +
     '<div class="row"><button class="sbtn" data-act="dec" style="flex:1">− 팩킹</button><button class="sbtn" data-act="inc" style="flex:1">+ 팩킹</button></div>' +
     '<div class="row"><button class="sbtn gray" data-act="reset" style="flex:1">추천값으로 되돌리기</button><button class="sbtn gray" data-act="zero">0개 (제외)</button></div></div>' +
     '<div class="sec"><label>진열방식 한 번에 변경 (칸마다)</label><select id="m-type">' + typeOptions(md, null, '', true) + '</select></div>' +
@@ -1214,13 +1215,31 @@ function changed() {
   if (VIEW === 'pog') { renderToolbar(P.mds[cur]); updateItems(); }
   renderPanel(); renderSidebar(); renderHeader();
 }
+// 직접 입력한 수량은 팩킹수량 배수로 반올림 (0은 제외라서 그대로, 1개 이상이면 최소 팩킹 1개)
+function roundPack(v, pack) {
+  v = Math.max(0, Math.round(v));
+  if (!(pack > 1) || v === 0) return v;
+  return Math.round(v / pack) * pack || pack;
+}
+function packNote(list) {
+  if (!list.length) return;
+  var f = list[0];
+  toast(list.length === 1 ? '팩킹수량 ' + f.pack + '개 단위로 맞췄어요: ' + f.from + ' → ' + f.to : list.length + '칸을 팩킹수량 단위로 맞췄어요 (예: ' + f.from + ' → ' + f.to + ')');
+}
 function setQty(os, v) {
+  var rounded = [];
   os.forEach(function (o) {
     var e = edit(o);
-    if (v == null || v === '' || isNaN(v)) delete e.qty; else e.qty = Math.max(0, Math.round(v));
+    if (v == null || v === '' || isNaN(v)) delete e.qty;
+    else {
+      var x = ITEM_INDEX[o], pack = x ? prodOf(x.it).pack || 0 : 0;
+      e.qty = roundPack(v, pack);
+      if (e.qty !== Math.max(0, Math.round(v))) rounded.push({ pack: pack, from: Math.round(v), to: e.qty });
+    }
     clean(o);
   });
   changed();
+  packNote(rounded);
 }
 function stepSel(dir) {
   if (!sel.size) return;
@@ -1336,13 +1355,15 @@ function tvRowHtml(r, i, cols) {
   var cls = (on ? 'on ' : '') + ((TV.mode === 'cell' ? r.ed : r.edn) ? 'ed ' : '') + ((TV.mode === 'cell' ? (r.qty === 0 || r.tid === 'none') : (r.qty === 0 && !r.unk)) ? 'ex' : '');
   return '<tr data-k="' + esc(key) + '" data-code="' + esc(r.code) + '" class="' + cls + '"><td class="rn">' + (i + 1) + '</td>' + cols.map(function (c) { return tvCell(c, r); }).join('') + '</tr>';
 }
-// 상품별 총수량을 칸들에 나눠 넣기: 0개(제외)로 둔 칸은 그대로, 나머지는 지금 수량 비율대로 (팩킹 단위로 나눠떨어지면 팩킹 단위로)
+// 상품별 총수량을 칸들에 나눠 넣기: 총수량은 팩킹수량 배수로 반올림, 0개(제외)로 둔 칸은 그대로, 나머지는 지금 수량 비율대로 팩킹 단위로
 function distributeTotal(os, total) {
   var xs = os.map(function (o) { var x = ITEM_INDEX[o]; return { o: o, x: x, q: qtyOf(x.md, x.it) }; });
   var pool = xs.filter(function (c) { return c.q !== 0; });
   if (!pool.length) pool = xs;
   var pack = prodOf(pool[0].x.it).pack || 1;
-  var unit = pack > 1 && total % pack === 0 ? pack : 1, units = total / unit;
+  var asked = total;
+  total = roundPack(total, pack);
+  var unit = pack > 1 ? pack : 1, units = total / unit;
   var w = pool.map(function (c) { return c.q > 0 ? c.q : (recOf(c.x.md, c.x.it).qty || 1); });
   var W = w.reduce(function (a, b) { return a + b; }, 0);
   var alloc = w.map(function (wi) { return Math.floor(units * wi / W); });
@@ -1351,6 +1372,7 @@ function distributeTotal(os, total) {
   for (var i = 0; left > 0; i = (i + 1) % order.length, left--) alloc[order[i]]++;
   pool.forEach(function (c, i) { edit(c.o).qty = alloc[i] * unit; });
   changed();
+  if (total !== asked) packNote([{ pack: pack, from: asked, to: total }]);
 }
 function renderTable() {
   if (!P) return;
