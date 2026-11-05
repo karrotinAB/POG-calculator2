@@ -81,6 +81,7 @@ header{height:56px;background:var(--o);color:#fff;display:flex;align-items:cente
 .it.dim{opacity:.22}
 .it.out{outline:2px dashed var(--red);opacity:.45}
 .it.out.sel{opacity:1}
+.it.stray{outline:2px dashed var(--red)}
 .it.sel{outline:2px solid var(--o);box-shadow:0 0 0 3px rgba(244,123,32,.4);z-index:999!important;opacity:1}
 .marquee{position:absolute;border:1px dashed var(--o2);background:rgba(244,123,32,.12);pointer-events:none;display:none;z-index:1000}
 .canvas-msg{padding:60px;text-align:center;color:var(--g5);font-size:14px;line-height:1.8}
@@ -682,6 +683,7 @@ function normalizePayload(d) {
     return {
       mdidx: String(m.mdidx || det.mdidx || ''), name: m.mdname || det.title || '', team: m.team || '', note: m.note || '',
       mdtype: det.mdtype || String(m.mdtype || 'A').charAt(0) || 'A', error: det.error || '',
+      fromGlobal: d.source === 'global-pog' || undefined,
       bays: det.bays || [], bodies: det.bodies || [], props: det.props || [], memos: det.memos || [],
       items: (det.items || []).map(function (it) {
         return { o: String(it.objidx), code: it.code, name: it.name, price: it.price, group: it.group, gd: it.dims ? it.dims.d : null, img: it.image, x: it.x, y: it.y, w: it.w, h: it.h, z: it.z };
@@ -836,8 +838,16 @@ function layoutOf(md) {
       var yo = !(bot <= b.top || top >= b.top + b.h) || Math.abs(bot - b.top) <= 1 || Math.abs(top - (b.top + b.h)) <= 1;
       return xo && yo;
     });
-    if (!hit.length) { info[it.o] = { bay: 99, bayLabel: '매대 밖', kind: '매대 밖', tier: null, out: true }; return; }
-    var bayObj = hit.find(function (b) { return cx >= b.left && cx < b.left + b.w; }) || hit[0];
+    var bayObj, stray = false;
+    if (!hit.length) {
+      if (!md.fromGlobal) { info[it.o] = { bay: 99, bayLabel: '매대 밖', kind: '매대 밖', tier: null, out: true }; return; }
+      // Global POG는 상품 위치를 이어붙여서 POG 원본 연 테두리와 어긋날 수 있음 → 지우지 않고 가장 가까운 연에 붙여서 경고만
+      stray = true;
+      var gap = function (b) {
+        return Math.max(0, b.left - (it.x + it.w), it.x - (b.left + b.w)) + Math.max(0, b.top - bot, top - (b.top + b.h));
+      };
+      bayObj = bays.slice().sort(function (a, b) { return gap(a) - gap(b); })[0];
+    } else bayObj = hit.find(function (b) { return cx >= b.left && cx < b.left + b.w; }) || hit[0];
     var bay = bayObj.no;
     var best = null, bd = 1e9;
     props.forEach(function (p) {
@@ -856,7 +866,7 @@ function layoutOf(md) {
       var ix = list.indexOf(best);
       tier = ix >= 0 ? ix + 1 : null;
     }
-    info[it.o] = { bay: bay, bayLabel: bayObj.label, kind: ok ? best.kind : '미확인', tier: tier, prop: ok ? best.key : null };
+    info[it.o] = { bay: bay, bayLabel: bayObj.label + (stray ? ' 근처' : ''), kind: ok ? best.kind : '미확인', tier: tier, prop: ok ? best.key : null, stray: stray || undefined };
   });
   var xs = [], ys = [];
   bays.forEach(function (b) { xs.push(b.left, b.left + b.w); ys.push(b.top, b.top + b.h); });
@@ -936,10 +946,11 @@ function matches(it) {
   return (it.code || '').toLowerCase().indexOf(searchQ) >= 0 || ((prodOf(it).name || it.name || '')).toLowerCase().indexOf(searchQ) >= 0;
 }
 function mdStats(md) {
-  var s = { n: md.items.length, nc: 0, ed: 0, tot: 0, hit: 0, out: 0 };
+  var s = { n: md.items.length, nc: 0, ed: 0, tot: 0, hit: 0, out: 0, stray: 0 };
   var LL = layoutOf(md);
   md.items.forEach(function (it) {
     if (LL.info[it.o] && LL.info[it.o].out) s.out++;
+    if (LL.info[it.o] && LL.info[it.o].stray) s.stray++;
     var q = qtyOf(md, it);
     if (q == null) s.nc++; else s.tot += q;
     if (isEdited(it.o)) s.ed++;
@@ -976,6 +987,7 @@ function renderSidebar() {
       (s.nc ? '<span class="tag red">미정 ' + s.nc + '</span>' : '') +
       (s.ed ? '<span class="tag blue">수정 ' + s.ed + '</span>' : '') +
       (md.outRemoved ? '<span class="tag" title="매대 영역 밖에 놓인 상품은 자동으로 뺐어요">매대 밖 ' + md.outRemoved + '개 제외</span>' : '') +
+      (s.stray ? '<span class="tag red" title="연 테두리 밖에 놓였지만 빼지 않고 가장 가까운 연으로 계산했어요 (빨간 점선)">테두리 밖 ' + s.stray + '칸</span>' : '') +
       (searchQ && s.hit ? '<span class="tag purple">검색 ' + s.hit + '</span>' : '');
     return '<div class="mdrow' + (i === cur ? ' cur' : '') + '" data-i="' + i + '"><div class="mdn">' + (P.done[md.mdidx] ? '✅ ' : '') + esc(md.name) + '</div><div class="mdt">' + esc(md.team) + ' · #' + esc(md.mdidx) + (md.note ? ' · ' + esc(md.note) : '') + '</div><div class="mdb">' + tags + '</div></div>';
   }).join('');
@@ -1062,6 +1074,7 @@ function updateItems() {
     el.querySelector('.q').textContent = q == null ? '?' : q;
     var inf = L ? L.info[it.o] : null;
     if (inf && inf.out) cls += ' out';
+    if (inf && inf.stray) cls += ' stray';
     el.className = cls;
     el.title = '[' + it.code + '] ' + (prodOf(it).name || it.name) + '\n수량 ' + (q == null ? '미정' : q) + ' · ' + (inf ? (inf.out ? '매대 밖' : inf.bayLabel + ' ' + (inf.tier ? inf.tier + '단 ' : '') + inf.kind) : '') + ' · ' + (TYPE_LABEL[t] || '');
   });
@@ -1076,7 +1089,7 @@ function updateItems() {
 }
 function kindChip(inf) {
   if (!inf) return '';
-  return '<span class="chip' + (inf.kind === '파이프' ? ' pipe' : inf.kind === '미확인' ? ' gray' : '') + '">' + (inf.out ? '⚠️ 매대 밖 (자동 제외)' : inf.bayLabel + (inf.tier ? ' · ' + inf.tier + '단' : '') + ' · ' + inf.kind) + '</span>';
+  return '<span class="chip' + (inf.kind === '파이프' ? ' pipe' : inf.kind === '미확인' ? ' gray' : '') + '">' + (inf.out ? '⚠️ 매대 밖 (자동 제외)' : (inf.stray ? '⚠️ 연 테두리 밖 · ' : '') + inf.bayLabel + (inf.tier ? ' · ' + inf.tier + '단' : '') + ' · ' + inf.kind) + '</span>';
 }
 function typeOptions(md, it, selected, withKeep) {
   var base = it ? baseType(md, it) : null;
@@ -1565,6 +1578,9 @@ function openFinal() {
   var notDone = P.mds.filter(function (m) { return !P.done[m.mdidx]; });
   var failed = P.mds.filter(function (m) { return m.error; });
   var h = '<div class="statgrid"><div class="stat"><b>' + P.mds.length + '</b><span>매대</span></div><div class="stat"><b>' + fmt(X.tot.length) + '</b><span>상품 종류</span></div><div class="stat"><b>' + fmt(totQty) + '</b><span>총 수량</span></div><div class="stat"><b>' + fmt(X.byMd.length) + '</b><span>매대별 행</span></div></div>';
+  var strayN = 0;
+  P.mds.forEach(function (md) { if (!md.error) strayN += mdStats(md).stray; });
+  if (strayN) h += '<div class="infobox">연 테두리 밖에 놓인 ' + strayN + '칸(빨간 점선)은 빼지 않고 가장 가까운 연으로 계산했어요. 엑셀의 연 칸에는 "근처"로 표시돼요.</div>';
   if (X.unkCells) h += '<div class="warnbox">⚠️ 수량이 정해지지 않은 칸이 <b>' + X.unkCells + '칸</b> 있어요. 엑셀에는 0으로 합산되고 비고에 표시돼요. <a href="#" id="goto-unk" style="color:inherit;font-weight:700">미정 칸 보러가기 →</a></div>';
   if (notDone.length) h += '<div class="infobox">확인 완료 표시를 안 한 매대 ' + notDone.length + '개: ' + esc(notDone.slice(0, 6).map(function (m) { return m.name; }).join(', ')) + (notDone.length > 6 ? ' 외' : '') + '</div>';
   if (failed.length) h += '<div class="warnbox">읽기 실패한 매대 ' + failed.length + '개는 엑셀에서 빠져요: ' + esc(failed.map(function (m) { return m.name; }).join(', ')) + '</div>';
