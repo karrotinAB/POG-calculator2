@@ -2,12 +2,13 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>초도리스트 POG 편집기</title>
 <link rel="icon" type="image/png" href="img/icon.png?v=1">
 <link rel="apple-touch-icon" href="img/icon-180.png?v=1">
 <style>
 :root{
+  --hh:56px;
   --o:#F47B20;--o2:#E86A10;--ol:#FFF3E8;
   --g9:#1A1A1A;--g7:#4A4A4A;--g5:#777;--g4:#A0A0A0;--g2:#E6E6E6;--g1:#F4F4F4;--w:#fff;
   --green:#1E9E5A;--gl:#E9F8EF;--red:#E03E2D;--rl:#FDECEA;--blue:#2B7BB9;--bl:#EAF3FB;--purple:#8E44AD;--pl:#F4ECF8;
@@ -17,7 +18,7 @@ html,body{height:100%}
 body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;color:var(--g9);background:var(--g1);font-size:13px;overflow:hidden}
 button{font-family:inherit;cursor:pointer}
 input,select{font-family:inherit}
-header{height:56px;background:var(--o);color:#fff;display:flex;align-items:center;gap:14px;padding:0 16px}
+header{--hh:56px;height:56px;background:var(--o);color:#fff;display:flex;align-items:center;gap:14px;padding:0 16px}
 .logo{font-size:16px;font-weight:800;letter-spacing:-.3px;white-space:nowrap}
 .hsub{font-size:11px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hstats{display:flex;gap:6px;flex-wrap:nowrap}
@@ -30,7 +31,7 @@ header{height:56px;background:var(--o);color:#fff;display:flex;align-items:cente
 .hbtn.warn{background:#fff3c4;color:#7a5200;border-color:#fff3c4}
 .save-status{font-size:11px;opacity:.85;white-space:nowrap;min-width:70px;text-align:right}
 
-.layout{display:grid;grid-template-columns:240px 1fr 330px;height:calc(100vh - 56px)}
+.layout{display:grid;grid-template-columns:240px 1fr 330px;height:calc(100vh - var(--hh));height:calc(100dvh - var(--hh))}
 .side{background:#fff;border-right:1px solid var(--g2);overflow:auto}
 .side-h{padding:12px 14px;font-size:12px;font-weight:700;color:var(--g5);border-bottom:1px solid var(--g2);position:sticky;top:0;background:#fff;z-index:2}
 .mdrow{padding:10px 14px;border-bottom:1px solid var(--g1);cursor:pointer}
@@ -201,20 +202,99 @@ table.xt .unk{color:var(--red);font-weight:700}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#222;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;z-index:6000;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.show{opacity:1}
 /* Global POG 연동 알림 (cloud.js) */
-#cloud-bar{position:fixed;top:62px;left:50%;transform:translateX(-50%);z-index:4500;background:#fff;border:1.5px solid var(--o);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.15);padding:9px 14px;font-size:13px;display:flex;gap:10px;align-items:center;max-width:92vw}
+#cloud-bar{position:fixed;top:calc(var(--hh) + 6px);left:50%;transform:translateX(-50%);z-index:4500;background:#fff;border:1.5px solid var(--o);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.15);padding:9px 14px;font-size:13px;display:flex;gap:10px;align-items:center;max-width:92vw}
 #cloud-bar.info{border-color:var(--g2);color:var(--g7)}
 #cloud-bar button{border:none;border-radius:6px;padding:5px 11px;font-weight:700;background:var(--o);color:#fff}
 #cloud-bar button.ghost{background:var(--g1);color:var(--g7)}
 #cloud-bar a{color:var(--blue)}
 .cloud-sec{margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--g2)}
 .cloud-sec .shdr{margin-top:0}
+
+/* ---------- 아이패드 · 모바일 ---------- */
+.narrow-only,.sheet-h,.scrim,.touch-only,.touch-help{display:none}
+.hbtn.ico{padding:6px 10px;font-size:16px;line-height:1}
+.hacts{display:flex;gap:14px}
+@media (pointer:coarse){
+  .touch-only{display:inline-block}
+  .touch-help{display:block}
+  .mouse-help{display:none}
+  body{touch-action:manipulation}
+  .viewport{touch-action:pan-x pan-y}
+  .zbtn{padding:7px 11px;font-size:13px}
+  .sbtn{padding:9px 12px}
+  .hbtn{padding:8px 12px}
+  .mdrow{padding:13px 14px}
+  .prop::before{top:-10px;bottom:-10px}
+  .prow,.loc{padding:10px 8px}
+  /* iOS는 16px보다 작은 입력칸을 누르면 화면을 확대함 */
+  input,select{font-size:16px!important}
+  table.xt input.tq{width:68px}
+  .zbtn:hover,.prop:hover{border-color:var(--g2);color:inherit;box-shadow:none}
+  .prop.on{box-shadow:0 0 0 2px var(--purple)}
+}
+.zbtn.on{background:var(--o);border-color:var(--o);color:#fff}
+/* 아이패드 세로 · 작은 노트북: 매대 목록을 서랍으로 */
+@media (max-width:1100px){
+  .narrow-only{display:inline-block}
+  .layout,.layout.tbl{grid-template-columns:1fr 300px}
+  .side{position:fixed;left:0;top:var(--hh);bottom:0;width:min(300px,85vw);z-index:3000;transform:translateX(-102%);transition:transform .2s;box-shadow:4px 0 20px rgba(0,0,0,.15)}
+  body.side-open .side{transform:none}
+  body.view-table #btn-side{display:none}
+  body.side-open .scrim,body.menu-open .scrim{display:block}
+  .scrim{position:fixed;inset:var(--hh) 0 0 0;background:rgba(0,0,0,.3);z-index:2900}
+  header{gap:8px;padding:0 10px}
+  .hstats,.save-status{display:none}
+  .search{width:170px;margin-left:auto}
+  .hacts{display:none;position:fixed;top:calc(var(--hh) + 4px);right:8px;z-index:3100;flex-direction:column;gap:6px;background:#fff;border-radius:10px;padding:8px;box-shadow:0 8px 28px rgba(0,0,0,.2);min-width:200px}
+  body.menu-open .hacts{display:flex}
+  .hacts .hbtn{background:var(--g1);color:var(--g9);border-color:var(--g1);text-align:left;padding:11px 12px}
+  .legend{display:none}
+  .toolbar{gap:8px;padding:6px 10px}
+}
+/* 휴대폰: 한 줄 화면, 오른쪽 패널은 아래에서 올라오는 시트로 */
+@media (max-width:760px){
+  :root{--hh:100px}
+  header{--hh:100px;height:auto;min-height:100px;flex-wrap:wrap;align-content:center;row-gap:6px;padding:6px 10px}
+  .wide-only,.hsub,.save-status{display:none}
+  .hbrand{flex:1;min-width:0}
+  .logo{font-size:15px}
+  .vtab{padding:5px 8px}
+  .search{order:10;flex:1 1 100%;width:auto;margin-left:0;padding:9px 10px}
+  #btn-prod{order:11;flex:1 1 100%}
+  .layout,.layout.tbl{grid-template-columns:1fr}
+  .panel{position:fixed;left:0;right:0;bottom:0;max-height:46vh;max-height:46dvh;z-index:3200;border-left:none;border-radius:14px 14px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,.2);transform:translateY(105%);transition:transform .2s;padding:0 14px calc(14px + env(safe-area-inset-bottom))}
+  body.panel-open .panel{transform:none}
+  .sheet-h{display:flex;align-items:center;justify-content:center;position:sticky;top:0;background:#fff;z-index:5;padding:8px 0 6px;margin-bottom:6px}
+  .grab{width:40px;height:5px;border-radius:3px;background:var(--g2)}
+  .sheet-x{position:absolute;right:0;top:6px;border:none;background:var(--g1);border-radius:14px;padding:5px 12px;font-size:12px;font-weight:700;color:var(--g7)}
+  .pimg{height:76px}
+  .pimg img{max-height:76px}
+  .toolbar .tb-sub{display:none}
+  .toolbar{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch}
+  .toolbar>*{flex-shrink:0}
+  .tb-group select{max-width:150px}
+  body.panel-open .viewport{padding-bottom:46vh}
+  .tb-title{font-size:13px}
+  .tb-group{font-size:11px}
+  .tvbar{gap:8px;padding:6px 10px;flex-wrap:nowrap;overflow-x:auto;white-space:nowrap}
+  .tvbar>*{flex-shrink:0}
+  .tvcnt{margin-left:0}
+  body.panel-open .tscroll{padding-bottom:46vh}
+  body.panel-open .toast{bottom:calc(46vh + 12px)}
+  .sgrid{grid-template-columns:1fr}
+  .statgrid{grid-template-columns:1fr 1fr}
+  .modal{max-height:92vh;max-height:92dvh}
+  .mb{padding:14px}
+  .toast{bottom:calc(16px + env(safe-area-inset-bottom));max-width:92vw}
+}
 </style>
 </head>
 <body>
 
 <header>
-  <div>
-    <div class="logo">초도리스트 POG 편집기</div>
+  <button class="hbtn ico narrow-only" id="btn-side" title="매대 목록">☰</button>
+  <div class="hbrand">
+    <div class="logo">초도리스트<span class="wide-only"> POG 편집기</span></div>
     <div class="hsub" id="hsub">Artbox Global</div>
   </div>
   <div class="vtabs" id="vtabs"><button class="vtab" data-view="pog">POG 보기</button><button class="vtab" data-view="table">표 보기</button></div>
@@ -222,10 +302,13 @@ table.xt .unk{color:var(--red);font-weight:700}
   <input class="search" id="search" placeholder="상품코드 / 상품명 검색">
   <span class="save-status" id="save-status"></span>
   <button class="hbtn warn" id="btn-prod" style="display:none" title="상품 뎁스·팩킹수량이 없는 상품만 POG 사이트에서 가져와요">상품 상세정보 채우기</button>
-  <button class="hbtn" id="btn-setup">새로 수집</button>
-  <button class="hbtn" id="btn-settings">설정</button>
-  <button class="hbtn" id="btn-export">진행상황 내보내기</button>
-  <button class="hbtn solid" id="btn-final">최종 확인 · 엑셀</button>
+  <div class="hacts" id="hacts">
+    <button class="hbtn" id="btn-setup">새로 수집</button>
+    <button class="hbtn" id="btn-settings">설정</button>
+    <button class="hbtn" id="btn-export">진행상황 내보내기</button>
+  </div>
+  <button class="hbtn ico narrow-only" id="btn-more" title="메뉴">⋯</button>
+  <button class="hbtn solid" id="btn-final"><span class="wide-only">최종 확인 · </span>엑셀</button>
 </header>
 
 <div class="layout">
@@ -237,8 +320,9 @@ table.xt .unk{color:var(--red);font-weight:700}
     </div>
   </section>
   <section class="tview" id="tview"></section>
-  <aside class="panel" id="panel"></aside>
+  <aside class="panel" id="panel-wrap"><div class="sheet-h"><span class="grab"></span><button class="sheet-x" id="sheet-x">닫기 ✕</button></div><div id="panel"></div></aside>
 </div>
+<div class="scrim" id="scrim"></div>
 
 <!-- 수집/불러오기 -->
 <div class="modal-bg" id="m-setup">
@@ -621,6 +705,8 @@ var P = null;
 var cur = 0;
 var sel = new Set();
 var zoom = 1, fitMode = 'h';
+var MULTI = false; // 터치 화면용: Ctrl 없이 하나씩 추가·해제
+function isPhone() { return window.matchMedia('(max-width:760px)').matches; }
 var searchQ = '';
 var LAYOUT = {};
 var ITEM_INDEX = {};
@@ -779,7 +865,7 @@ function afterLoad() {
   sel = new Set();
   closeModal('m-setup');
   saveNow();
-  fitMode = 'h';
+  fitMode = isPhone() ? 'all' : 'h';
   renderAll();
 }
 function readFile(file) {
@@ -966,6 +1052,7 @@ function renderAll() {
   document.querySelector('.layout').style.visibility = has ? 'visible' : 'hidden';
   if (!has) { openSetup(true); return; }
   document.querySelector('.layout').classList.toggle('tbl', VIEW === 'table');
+  document.body.classList.toggle('view-table', VIEW === 'table');
   document.querySelectorAll('.vtab').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-view') === VIEW); });
   renderHeader();
   if (VIEW === 'table') { renderTable(); renderPanel(); return; }
@@ -1005,7 +1092,7 @@ function renderToolbar(md) {
     '<div class="tb-group" title="이 매대의 고리(파이프) 칸 기본 진열방식">매대 고리 <select id="md-type-pipe">' + opts('pipe', board ? TYPE_LABEL.hook_board : TYPE_LABEL.hook) + '</select></div>' +
     (nProp ? '<div class="tb-group"><span class="tag purple" title="선반/고리를 따로 설정한 곳">선반·고리 개별 설정 ' + nProp + '</span></div>' : '') +
     '<label class="tb-group"><input type="checkbox" id="md-done"' + (P.done[md.mdidx] ? ' checked' : '') + '> 확인 완료</label>' +
-    '<div class="tb-group"><button class="zbtn" data-z="out">−</button><span id="zlbl" style="min-width:38px;text-align:center">' + Math.round(zoom * 100) + '%</span><button class="zbtn" data-z="in">+</button><button class="zbtn" data-z="h">높이 맞춤</button><button class="zbtn" data-z="all">전체 보기</button></div>' +
+    '<div class="tb-group"><button class="zbtn" data-z="out">−</button><span id="zlbl" style="min-width:38px;text-align:center">' + Math.round(zoom * 100) + '%</span><button class="zbtn" data-z="in">+</button><button class="zbtn" data-z="h">높이<span class="wide-only"> 맞춤</span></button><button class="zbtn" data-z="all">전체<span class="wide-only"> 보기</span></button><button class="zbtn touch-only' + (MULTI ? ' on' : '') + '" data-z="multi" title="켜면 누를 때마다 하나씩 추가·해제">여러 개<span class="wide-only"> 선택</span></button></div>' +
     '<div class="legend"><span class="lg"><i style="background:#8A9099;height:4px"></i>선반</span><span class="lg"><i style="background:repeating-linear-gradient(90deg,#F47B20 0 4px,transparent 4px 6px);height:3px"></i>파이프</span><span class="lg"><i style="background:var(--green)"></i>추천값</span><span class="lg"><i style="background:var(--blue)"></i>수정함</span><span class="lg"><i style="background:var(--red)"></i>미정</span></div>';
 }
 function renderCanvas() {
@@ -1163,12 +1250,15 @@ function prodTable(it, p) {
 }
 function renderPanel() {
   if (!P) { panel.innerHTML = ''; return; }
+  // 휴대폰: 선택한 게 있을 때만 아래 시트를 올림
+  document.body.classList.toggle('panel-open', VIEW === 'table' ? !!TV.pick : sel.size > 0);
   if (VIEW === 'table') { renderTablePanel(); return; }
   var md = P.mds[cur];
   var list = Array.from(sel).map(function (o) { return ITEM_INDEX[o]; }).filter(Boolean);
   if (!list.length) {
     panel.innerHTML = '<div class="help"><b>상품을 클릭</b>하면 상세정보와 수량이 여기 나와요.<br><br>' +
-      '• <b>Ctrl/⌘ + 클릭</b>: 하나씩 추가·해제<br>• <b>빈 곳에서 드래그</b>: 영역 선택 (Shift/Ctrl 누르면 추가)<br>• <b>더블클릭</b>: 이 매대의 같은 상품 모두 선택<br>• <kbd>+</kbd> <kbd>−</kbd>: 선택한 칸 팩킹수량 단위로 증감<br>• <kbd>Ctrl</kbd>+<kbd>A</kbd>: 매대 전체 선택 · <kbd>Esc</kbd>: 선택 해제<br>• <kbd>Ctrl</kbd>+휠: 확대/축소<br><br>' +
+      '<div class="touch-help">• <b>누르기</b>: 상품 선택 · 선반/고리 줄을 누르면 그 줄 전체 선택<br>• <b>여러 개 선택</b> 버튼을 켜면 누를 때마다 하나씩 추가·해제<br>• <b>두 손가락</b>으로 확대·축소, 한 손가락으로 이동<br><br></div>' +
+      '<div class="mouse-help">• <b>Ctrl/⌘ + 클릭</b>: 하나씩 추가·해제<br>• <b>빈 곳에서 드래그</b>: 영역 선택 (Shift/Ctrl 누르면 추가)<br>• <b>더블클릭</b>: 이 매대의 같은 상품 모두 선택<br>• <kbd>+</kbd> <kbd>−</kbd>: 선택한 칸 팩킹수량 단위로 증감<br>• <kbd>Ctrl</kbd>+<kbd>A</kbd>: 매대 전체 선택 · <kbd>Esc</kbd>: 선택 해제<br>• <kbd>Ctrl</kbd>+휠: 확대/축소<br><br></div>' +
       '배지 색: <span style="color:var(--green);font-weight:700">초록</span> 추천값 · <span style="color:var(--blue);font-weight:700">파랑</span> 직접 수정 · <span style="color:var(--red);font-weight:700">빨강 ?</span> 뎁스 없어서 미정</div>';
     return;
   }
@@ -1666,7 +1756,7 @@ viewport.addEventListener('mousedown', function (e) {
   var el = e.target.closest('.it');
   if (el) {
     var o = el.getAttribute('data-o');
-    if (e.ctrlKey || e.metaKey) { if (sel.has(o)) sel.delete(o); else sel.add(o); }
+    if (e.ctrlKey || e.metaKey || MULTI) { if (sel.has(o)) sel.delete(o); else sel.add(o); }
     else if (e.shiftKey) sel.add(o);
     else sel = new Set([o]);
     afterSel();
@@ -1678,7 +1768,7 @@ viewport.addEventListener('mousedown', function (e) {
     var pk = pe.getAttribute('data-pk'), L = CUR_L;
     var os = P.mds[cur].items.filter(function (it) { return L.info[it.o] && L.info[it.o].prop === pk; }).map(function (it) { return it.o; });
     if (!os.length) { toast('이 선반/고리에는 상품이 없어요'); e.preventDefault(); return; }
-    if (!(e.ctrlKey || e.metaKey || e.shiftKey)) sel = new Set();
+    if (!(e.ctrlKey || e.metaKey || e.shiftKey || MULTI)) sel = new Set();
     os.forEach(function (o) { sel.add(o); });
     afterSel();
     e.preventDefault();
@@ -1732,12 +1822,54 @@ window.addEventListener('resize', function () { if (fitMode && CUR_L && VIEW ===
 
 side.addEventListener('click', function (e) {
   var r = e.target.closest('.mdrow');
-  if (r) switchMd(+r.getAttribute('data-i'));
+  if (r) { switchMd(+r.getAttribute('data-i')); document.body.classList.remove('side-open'); }
 });
+
+/* ---------- 아이패드 · 모바일 ---------- */
+// 헤더 높이가 화면 폭에 따라 달라져서 (휴대폰은 2~3줄) 실제 높이를 CSS에 알려줌
+(function () {
+  var hd = document.querySelector('header');
+  var setH = function () { document.documentElement.style.setProperty('--hh', hd.offsetHeight + 'px'); };
+  setH();
+  if (window.ResizeObserver) new ResizeObserver(function () { setH(); if (fitMode && CUR_L && VIEW === 'pog') fit(fitMode); }).observe(hd);
+  window.addEventListener('resize', setH);
+})();
+function closeDrawers() { document.body.classList.remove('side-open', 'menu-open'); }
+$('btn-side').onclick = function () { document.body.classList.remove('menu-open'); document.body.classList.toggle('side-open'); };
+$('btn-more').onclick = function () { document.body.classList.remove('side-open'); document.body.classList.toggle('menu-open'); };
+$('scrim').onclick = closeDrawers;
+$('hacts').addEventListener('click', function () { document.body.classList.remove('menu-open'); });
+$('sheet-x').onclick = function () {
+  if (VIEW === 'table') { TV.pick = null; tview.querySelectorAll('tbody tr.on').forEach(function (x) { x.classList.remove('on'); }); renderPanel(); }
+  else { sel = new Set(); afterSel(); }
+};
+// 두 손가락으로 확대·축소 (손가락 사이 지점을 기준으로)
+var pinch = null;
+function tdist(t) { return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY); }
+viewport.addEventListener('touchstart', function (e) {
+  if (e.touches.length !== 2 || !CUR_L) return;
+  var r = viewport.getBoundingClientRect();
+  var mx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - r.left, my = (e.touches[0].clientY + e.touches[1].clientY) / 2 - r.top;
+  pinch = { d: tdist(e.touches), z: zoom, mx: mx, my: my, cx: (viewport.scrollLeft + mx - 16) / zoom, cy: (viewport.scrollTop + my - 16) / zoom };
+  e.preventDefault();
+}, { passive: false });
+viewport.addEventListener('touchmove', function (e) {
+  if (!pinch || e.touches.length !== 2) return;
+  e.preventDefault();
+  zoom = Math.max(0.3, Math.min(3, pinch.z * tdist(e.touches) / pinch.d));
+  fitMode = null;
+  applyZoom();
+  viewport.scrollLeft = pinch.cx * zoom + 16 - pinch.mx;
+  viewport.scrollTop = pinch.cy * zoom + 16 - pinch.my;
+}, { passive: false });
+viewport.addEventListener('touchend', function (e) { if (e.touches.length < 2) pinch = null; });
+// iOS Safari의 화면 전체 확대 제스처는 POG 화면 안에서만 막음
+viewport.addEventListener('gesturestart', function (e) { e.preventDefault(); });
 toolbar.addEventListener('click', function (e) {
   var b = e.target.closest('[data-z]');
   if (!b) return;
   var z = b.getAttribute('data-z');
+  if (z === 'multi') { MULTI = !MULTI; b.classList.toggle('on', MULTI); toast(MULTI ? '여러 개 선택: 누를 때마다 하나씩 추가·해제돼요' : '여러 개 선택 끔'); return; }
   if (z === 'in') { zoom = Math.min(3, zoom * 1.2); fitMode = null; applyZoom(); }
   else if (z === 'out') { zoom = Math.max(0.3, zoom / 1.2); fitMode = null; applyZoom(); }
   else fit(z);
@@ -1781,7 +1913,7 @@ document.addEventListener('keydown', function (e) {
   if (/INPUT|SELECT|TEXTAREA/.test(tag) || VIEW !== 'pog') return;
   if (e.key === '+' || e.key === '=') { stepSel(1); e.preventDefault(); }
   else if (e.key === '-' || e.key === '_') { stepSel(-1); e.preventDefault(); }
-  else if (e.key === 'Escape') { sel = new Set(); afterSel(); }
+  else if (e.key === 'Escape') { closeDrawers(); sel = new Set(); afterSel(); }
   else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a') { e.preventDefault(); sel = new Set(P.mds[cur].items.map(function (it) { return it.o; })); afterSel(); }
 });
 $('search').addEventListener('input', function () {
