@@ -48,6 +48,15 @@ header>*{flex-shrink:0}
 .tag.blue{background:var(--bl);color:var(--blue)}
 .tag.green{background:var(--gl);color:var(--green)}
 .tag.purple{background:var(--pl);color:var(--purple)}
+.tag.sky{background:#E0F2FE;color:#0369A1}
+.it.chg{box-shadow:0 0 0 2px #0EA5E9}
+.it.chg::after{content:attr(data-chg);position:absolute;left:-2px;top:-2px;background:#0EA5E9;color:#fff;font-size:9px;font-weight:800;line-height:12px;padding:0 3px;border-radius:3px;z-index:3;pointer-events:none}
+.it.chg.moved{box-shadow:0 0 0 2px rgba(14,165,233,.45)}
+.it.chg.moved::after{background:rgba(14,165,233,.7)}
+.chip.sky{background:#E0F2FE;color:#0369A1}
+.chgl{font-size:12px;line-height:1.6;margin-top:6px}
+.chgl div{padding:5px 0;border-bottom:1px solid var(--g1)}
+.chgl .why{color:var(--g5)}
 
 .main{display:flex;flex-direction:column;min-width:0;min-height:0}
 .toolbar{background:#fff;border-bottom:1px solid var(--g2);padding:8px 12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
@@ -320,6 +329,7 @@ body.view-table #btn-side{display:none}
   <span class="save-status" id="save-status"></span>
   <button class="hbtn warn" id="btn-prod" style="display:none" title="상품 뎁스·팩킹수량이 없는 상품만 POG 사이트에서 가져와요">상품 상세정보 채우기</button>
   <div class="hacts" id="hacts">
+    <button class="hbtn" id="btn-changes" style="display:none" title="최근 POG 업데이트로 바뀐 칸">변경 내역</button>
     <button class="hbtn" id="btn-setup">새로 수집</button>
     <button class="hbtn" id="btn-settings">설정</button>
     <button class="hbtn" id="btn-export">진행상황 내보내기</button>
@@ -395,6 +405,15 @@ body.view-table #btn-side{display:none}
       <div class="infobox">추천 수량 = 진열깊이 ÷ 상품 뎁스 → 팩킹수량 단위로 올림 → 상한 적용 (팩킹수량이 상한보다 크면 팩킹수량이 상한)<br>직접 바꾼 수량은 설정을 바꿔도 그대로 유지돼요.</div>
     </div>
     <div class="mf"><button class="sbtn gray" id="set-reset">기본값</button><button class="sbtn fill" id="set-save">저장</button></div>
+  </div>
+</div>
+
+<!-- POG 업데이트 변경 내역 -->
+<div class="modal-bg" id="m-changes">
+  <div class="modal">
+    <div class="mh"><h2>POG 업데이트 변경 내역</h2><button class="mx" data-close="m-changes">×</button></div>
+    <div class="mb" id="chg-body"></div>
+    <div class="mf"><button class="sbtn gray" id="chg-clear">변경 표시 지우기</button><button class="sbtn" id="chg-goto">변경된 칸 보기</button><button class="sbtn fill" data-close="m-changes">확인</button></div>
   </div>
 </div>
 
@@ -835,9 +854,18 @@ function ingest(d, msgPrefix) {
   var products = {}, pp = (prev && prev.products) || {};
   Object.keys(pp).forEach(function (c) { if (pp[c] && !pp[c].error) products[c] = pp[c]; });
   Object.keys(n.products).forEach(function (c) { var np = n.products[c]; if ((np && !np.error) || !products[c]) products[c] = np; });
-  P = { store: n.store, collectedAt: n.collectedAt, mds: n.mds, products: products, edits: prev ? prev.edits || {} : {}, mdTypes: prev ? prev.mdTypes || {} : {}, propTypes: prev ? prev.propTypes || {} : {}, done: prev ? prev.done || {} : {} };
+  P = { store: n.store, collectedAt: n.collectedAt, mds: n.mds, products: products, edits: prev ? prev.edits || {} : {}, mdTypes: prev ? prev.mdTypes || {} : {}, propTypes: prev ? prev.propTypes || {} : {}, done: prev ? prev.done || {} : {}, changes: prev ? prev.changes || null : null };
   var kept = Object.keys(P.edits).length;
   afterLoad();
+  // 전에 불러온 POG가 있으면 바뀐 칸을 찾아서 표시하고, 빠진 칸에 기입한 값은 같은 상품의 새 칸으로 옮김
+  if (prev && prev.mds && prev.mds.length) {
+    var ch = diffPog(prev, P);
+    if (ch.n) {
+      P.changes = mergeChanges(P.changes, ch);
+      saveNow(); renderAll();
+      openChanges();
+    }
+  }
   toast((msgPrefix || '') + (n.store.name || code) + ' — 매대 ' + n.mds.length + '개, 상품 ' + Object.keys(CODE_INDEX).length + '종' + (kept ? ' (이전 수정 ' + kept + '건 유지)' : ''));
   return true;
 }
@@ -1054,11 +1082,12 @@ function matches(it) {
   return (it.code || '').toLowerCase().indexOf(searchQ) >= 0 || ((prodOf(it).name || it.name || '')).toLowerCase().indexOf(searchQ) >= 0;
 }
 function mdStats(md) {
-  var s = { n: md.items.length, nc: 0, ed: 0, tot: 0, hit: 0, out: 0, stray: 0 };
+  var s = { n: md.items.length, nc: 0, ed: 0, tot: 0, hit: 0, out: 0, stray: 0, chg: 0 };
   var LL = layoutOf(md);
   md.items.forEach(function (it) {
     if (LL.info[it.o] && LL.info[it.o].out) s.out++;
     if (LL.info[it.o] && LL.info[it.o].stray) s.stray++;
+    if (chgOf(it.o)) s.chg++;
     var q = qtyOf(md, it);
     if (q == null) s.nc++; else s.tot += q;
     if (isEdited(it.o)) s.ed++;
@@ -1081,6 +1110,7 @@ function renderAll() {
   renderSidebar(); renderCanvas(); renderPanel();
 }
 function renderHeader() {
+  $('btn-changes').style.display = P && P.changes ? '' : 'none';
   var n = 0, tot = 0, nc = 0, ed = 0;
   P.mds.forEach(function (md) { var s = mdStats(md); n += s.n; tot += s.tot; nc += s.nc; ed += s.ed; });
   var dt = P.collectedAt ? new Date(P.collectedAt).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
@@ -1096,6 +1126,7 @@ function renderSidebar() {
       (s.nc ? '<span class="tag red">미정 ' + s.nc + '</span>' : '') +
       (s.ed ? '<span class="tag blue">수정 ' + s.ed + '</span>' : '') +
       (md.outRemoved ? '<span class="tag" title="매대 영역 밖에 놓인 상품은 자동으로 뺐어요">매대 밖 ' + md.outRemoved + '개 제외</span>' : '') +
+      (s.chg ? '<span class="tag sky" title="최근 POG 업데이트로 바뀐 칸">변경 ' + s.chg + '</span>' : '') +
       (s.stray ? '<span class="tag red" title="연 테두리 밖에 놓였지만 빼지 않고 가장 가까운 연으로 계산했어요 (빨간 점선)">테두리 밖 ' + s.stray + '칸</span>' : '') +
       (searchQ && s.hit ? '<span class="tag purple">검색 ' + s.hit + '</span>' : '');
     return '<div class="mdrow' + (i === cur ? ' cur' : '') + '" data-i="' + i + '"><div class="mdn">' + (P.done[md.mdidx] ? '✅ ' : '') + esc(md.name) + '</div><div class="mdt">' + esc(md.team) + ' · #' + esc(md.mdidx) + (md.note ? ' · ' + esc(md.note) : '') + '</div><div class="mdb">' + tags + '</div></div>';
@@ -1184,6 +1215,8 @@ function updateItems() {
     var inf = L ? L.info[it.o] : null;
     if (inf && inf.out) cls += ' out';
     if (inf && inf.stray) cls += ' stray';
+    var cg = chgOf(it.o);
+    if (cg) { cls += ' chg' + (cg === 'moved' ? ' moved' : ''); el.setAttribute('data-chg', CHG_SHORT[cg]); } else el.removeAttribute('data-chg');
     el.className = cls;
     el.title = '[' + it.code + '] ' + (prodOf(it).name || it.name) + '\n수량 ' + (q == null ? '미정' : q) + ' · ' + (inf ? (inf.out ? '매대 밖' : inf.bayLabel + ' ' + (inf.tier ? inf.tier + '단 ' : '') + inf.kind) : '') + ' · ' + (TYPE_LABEL[t] || '');
   });
@@ -1295,7 +1328,7 @@ function renderPanel() {
     same.forEach(function (x) { if (x.md !== mdx) otherMds[x.md.mdidx] = x.md.name; });
     var otherNames = Object.keys(otherMds).map(function (k) { return otherMds[k]; });
     panel.innerHTML =
-      prodHead(it, p, kindChip(inf)) + prodTable(it, p) +
+      prodHead(it, p, kindChip(inf) + (chgOf(it.o) ? '<span class="chip sky">' + CHG_LONG[chgOf(it.o)] + '</span>' : '')) + prodTable(it, p) +
       '<div class="sec"><label>진열방식 (이 칸)</label><select id="p-type">' + typeOptions(mdx, it, validType(e.type) ? e.type : '', false) + '</select><div class="muted">' + esc(TYPE_LABEL[t]) + ' · ' + depthText(t) + ' · <b>' + typeSource(mdx, it) + '</b> 기준</div></div>' +
       propSection(list, true) +
       '<div class="recbox' + (r.qty == null ? ' bad' : '') + '">추천 수량 <b>' + (r.qty == null ? '미정' : r.qty) + '</b><div class="muted" style="color:inherit;opacity:.8">' + esc(r.expl) + '</div></div>' +
@@ -1435,6 +1468,7 @@ function tvRows() {
     if (TV.only === 'unk') rows = rows.filter(function (c) { return c.qty == null; });
     if (TV.only === 'ed') rows = rows.filter(function (c) { return c.ed; });
     if (TV.only === 'ex') rows = rows.filter(function (c) { return c.qty === 0 || c.tid === 'none'; });
+    if (TV.only === 'chg') rows = rows.filter(function (c) { return chgOf(c.o); });
   } else {
     var g = {}, order = [];
     cells.forEach(function (c) {
@@ -1450,6 +1484,7 @@ function tvRows() {
     if (TV.only === 'unk') rows = rows.filter(function (r) { return r.unk; });
     if (TV.only === 'ed') rows = rows.filter(function (r) { return r.edn; });
     if (TV.only === 'ex') rows = rows.filter(function (r) { return r.qty === 0 && !r.unk; });
+    if (TV.only === 'chg') rows = rows.filter(function (r) { return r.os.some(chgOf); });
   }
   if (TV.sortK) {
     var k = TV.sortK, dir = TV.sortDir;
@@ -1512,7 +1547,7 @@ function renderTable() {
     '<div class="tvbar">' +
     '<div class="seg"><button data-tvmode="prod"' + (TV.mode === 'prod' ? ' class="on"' : '') + '>상품별</button><button data-tvmode="cell"' + (TV.mode === 'cell' ? ' class="on"' : '') + '>칸별</button></div>' +
     '<select id="tv-md"><option value="">전체 매대 (' + P.mds.length + ')</option>' + P.mds.map(function (m) { return '<option value="' + esc(m.mdidx) + '"' + (TV.md === m.mdidx ? ' selected' : '') + '>' + esc(m.name) + '</option>'; }).join('') + '</select>' +
-    '<select id="tv-only"><option value="">모두 보기</option><option value="unk"' + (TV.only === 'unk' ? ' selected' : '') + '>수량 미정만</option><option value="ed"' + (TV.only === 'ed' ? ' selected' : '') + '>수정한 것만</option><option value="ex"' + (TV.only === 'ex' ? ' selected' : '') + '>0개 · 제외만</option></select>' +
+    '<select id="tv-only"><option value="">모두 보기</option><option value="unk"' + (TV.only === 'unk' ? ' selected' : '') + '>수량 미정만</option><option value="ed"' + (TV.only === 'ed' ? ' selected' : '') + '>수정한 것만</option><option value="ex"' + (TV.only === 'ex' ? ' selected' : '') + '>0개 · 제외만</option>' + (P.changes ? '<option value="chg"' + (TV.only === 'chg' ? ' selected' : '') + '>POG 변경된 칸만</option>' : '') + '</select>' +
     (searchQ ? '<span class="tag purple">검색: ' + esc(searchQ) + '</span>' : '') +
     '<span class="tvcnt">' + fmt(rows.length) + (TV.mode === 'cell' ? '칸' : '종') + ' · 합계 ' + fmt(tq) + '개' + (unk ? ' · <span class="unk">미정 ' + unk + '칸</span>' : '') + '</span>' +
     '<button class="sbtn gray" id="tv-xlsx" style="padding:4px 10px;font-size:12px">이 표 엑셀 저장</button>' +
@@ -1630,6 +1665,129 @@ panel.addEventListener('click', function (e) {
   }
 });
 $('vtabs').addEventListener('click', function (e) { var b = e.target.closest('[data-view]'); if (b) setView(b.getAttribute('data-view')); });
+
+/* ---------- POG 업데이트 변경 내역 ---------- */
+var CHG_SHORT = { 'new': 'NEW', moved: '이동', swapped: '교체', carried: 'NEW' };
+var CHG_LONG = { 'new': '🆕 POG 업데이트로 새로 생긴 칸', moved: '↔ POG 업데이트로 위치가 바뀐 칸', swapped: '🔄 같은 자리 상품이 바뀐 칸', carried: '🆕 새로 생긴 칸 (빠진 칸에 기입한 값을 옮겨옴)' };
+function chgOf(o) { return P && P.changes && P.changes.items ? P.changes.items[o] || null : null; }
+function editText(e) {
+  return [e.qty != null ? '수량 ' + e.qty : '', validType(e.type) ? '진열방식 ' + TYPE_LABEL[e.type] : ''].filter(Boolean).join(', ');
+}
+// 가장 많은 칸이 같이 움직인 이동량 (같으면 덜 움직인 쪽)
+function commonShift(ds) {
+  var cnt = {}, best = [0, 0], bn = 0;
+  ds.forEach(function (d) {
+    var k = Math.round(d[0]) + ',' + Math.round(d[1]), n = cnt[k] = (cnt[k] || 0) + 1;
+    var v = k.split(',').map(Number);
+    if (n > bn || (n === bn && Math.abs(v[0]) + Math.abs(v[1]) < Math.abs(best[0]) + Math.abs(best[1]))) { bn = n; best = v; }
+  });
+  return best;
+}
+// 이전 POG(prev)와 새로 불러온 POG(P)를 칸 고유번호로 비교. 기입한 값(P.edits)은 칸 고유번호에 붙어 있음
+function diffPog(prev, P) {
+  var ch = { at: new Date().toISOString(), items: {}, removed: 0, mdsAdded: [], mdsRemoved: [], carried: 0, dropped: [], perMd: {} };
+  var oldMd = {}, seen = {};
+  prev.mds.forEach(function (m) { oldMd[m.mdidx] = m; });
+  P.mds.forEach(function (md) {
+    seen[md.mdidx] = 1;
+    var om = oldMd[md.mdidx], pm = ch.perMd[md.mdidx] = { name: md.name, add: 0, del: 0, mov: 0, swp: 0 };
+    if (!om || om.error) {
+      if (!om) ch.mdsAdded.push(md.name);
+      md.items.forEach(function (it) { ch.items[it.o] = 'new'; pm.add++; });
+      return;
+    }
+    var oi = {}, ni = {};
+    om.items.forEach(function (it) { oi[it.o] = it; });
+    md.items.forEach(function (it) { ni[it.o] = it; });
+    // 매대 전체가 같이 밀린 건(Global POG 이어붙이기 등) 이동으로 안 침: 공통 이동량을 빼고 비교
+    var ds = [];
+    md.items.forEach(function (it) { var o = oi[it.o]; if (o && o.code === it.code) ds.push([it.x - o.x, it.y - o.y]); });
+    var sh = commonShift(ds), mx = sh[0], my = sh[1], added = [];
+    md.items.forEach(function (it) {
+      var o = oi[it.o];
+      if (!o) { ch.items[it.o] = 'new'; added.push(it); pm.add++; return; }
+      if (o.code !== it.code) {
+        ch.items[it.o] = 'swapped'; pm.swp++;
+        var e = P.edits[it.o];
+        if (e && e.qty != null) {
+          ch.dropped.push({ md: md.name, code: o.code, name: (prodOf(o).name || o.name), what: '수량 ' + e.qty, why: '같은 자리 상품이 ' + it.code + '(으)로 바뀌어서 수량 수정을 풀었어요' });
+          delete e.qty; clean(it.o);
+        }
+        return;
+      }
+      if (Math.abs(it.x - o.x - mx) + Math.abs(it.y - o.y - my) > 3) { ch.items[it.o] = 'moved'; pm.mov++; }
+    });
+    om.items.forEach(function (o) {
+      if (ni[o.o]) return;
+      ch.removed++; pm.del++;
+      var e = P.edits[o.o];
+      if (!e || (e.qty == null && !validType(e.type))) return;
+      // 같은 매대에 같은 상품의 새 칸이 있으면 가장 가까운 칸으로 옮김
+      var cand = added.filter(function (a) { return a.code === o.code && !P.edits[a.o]; });
+      cand.sort(function (a, b) { return (Math.abs(a.x - o.x) + Math.abs(a.y - o.y)) - (Math.abs(b.x - o.x) + Math.abs(b.y - o.y)); });
+      if (cand.length) { P.edits[cand[0].o] = e; delete P.edits[o.o]; ch.carried++; ch.items[cand[0].o] = 'carried'; }
+      else ch.dropped.push({ md: md.name, code: o.code, name: (prodOf(o).name || o.name), what: editText(e), why: 'POG에서 빠진 칸이에요' });
+    });
+    if (!pm.add && !pm.del && !pm.mov && !pm.swp) delete ch.perMd[md.mdidx];
+  });
+  prev.mds.forEach(function (m) {
+    if (seen[m.mdidx]) return;
+    ch.mdsRemoved.push(m.name);
+    m.items.forEach(function (o) {
+      ch.removed++;
+      var e = P.edits[o.o];
+      if (e && (e.qty != null || validType(e.type))) ch.dropped.push({ md: m.name, code: o.code, name: (prodOf(o).name || o.name), what: editText(e), why: '매대가 POG에서 빠졌어요' });
+    });
+  });
+  ch.kept = Object.keys(P.edits).filter(function (o) { return ITEM_INDEX[o] && ch.items[o] !== 'carried' && isEdited(o); }).length;
+  ch.n = Object.keys(ch.items).length + ch.removed + ch.mdsRemoved.length;
+  return ch;
+}
+// 변경 표시를 안 지운 채로 또 업데이트하면 합쳐서 보여줌
+function mergeChanges(old, ch) {
+  if (!old) return ch;
+  var items = {};
+  Object.keys(old.items || {}).forEach(function (o) { if (ITEM_INDEX[o]) items[o] = old.items[o]; });
+  Object.keys(ch.items).forEach(function (o) { items[o] = ch.items[o]; });
+  ch.items = items;
+  ch.dropped = (old.dropped || []).concat(ch.dropped);
+  ch.mdsAdded = (old.mdsAdded || []).concat(ch.mdsAdded);
+  ch.mdsRemoved = (old.mdsRemoved || []).concat(ch.mdsRemoved);
+  ch.removed += old.removed || 0;
+  ch.carried += old.carried || 0;
+  return ch;
+}
+function openChanges() {
+  var C = P && P.changes;
+  if (!C) return;
+  var cnt = { 'new': 0, moved: 0, swapped: 0, carried: 0 };
+  Object.keys(C.items).forEach(function (o) { if (ITEM_INDEX[o]) cnt[C.items[o]]++; });
+  var h = '<div class="muted" style="margin:0 0 10px">업데이트 ' + new Date(C.at).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' · POG 화면과 표에 <span style="color:#0369A1;font-weight:700">하늘색</span>으로 표시돼요</div>' +
+    '<div class="statgrid"><div class="stat"><b>' + (cnt['new'] + cnt.carried) + '</b><span>새로 생긴 칸</span></div><div class="stat"><b>' + C.removed + '</b><span>빠진 칸</span></div><div class="stat"><b>' + cnt.swapped + '</b><span>상품 바뀐 칸</span></div><div class="stat"><b>' + cnt.moved + '</b><span>위치 바뀐 칸</span></div></div>';
+  h += '<div class="infobox">✅ 직접 기입한 값(수량·진열방식) <b>' + C.kept + '건</b>은 그대로 두었어요' + (C.carried ? '<br>➡️ 빠진 칸에 기입한 값 <b>' + C.carried + '건</b>은 같은 매대의 같은 상품 새 칸으로 옮겼어요' : '') + '<br>선반·고리 설정, 매대 설정, 확인 완료, 상품 상세정보도 그대로예요.</div>';
+  if (C.dropped.length) h += '<div class="warnbox">⚠️ 옮길 곳이 없어서 확인이 필요한 기입 값 <b>' + C.dropped.length + '건</b><div class="chgl">' + C.dropped.map(function (d) {
+    return '<div><b>' + esc(d.md) + '</b> · ' + esc(d.name || d.code) + ' <span class="why">(' + esc(d.code) + ')</span><br>' + esc(d.what) + ' — <span class="why">' + esc(d.why) + '</span></div>';
+  }).join('') + '</div></div>';
+  var rows = Object.keys(C.perMd || {}).map(function (k) { var m = C.perMd[k]; return '<div><b>' + esc(m.name) + '</b> · ' + [m.add ? '새 칸 ' + m.add : '', m.del ? '빠진 칸 ' + m.del : '', m.swp ? '상품 바뀜 ' + m.swp : '', m.mov ? '위치 바뀜 ' + m.mov : ''].filter(Boolean).join(' · ') + '</div>'; });
+  C.mdsAdded.forEach(function (n) { rows.push('<div>🆕 새 매대: <b>' + esc(n) + '</b></div>'); });
+  C.mdsRemoved.forEach(function (n) { rows.push('<div>🗑 빠진 매대: <b>' + esc(n) + '</b></div>'); });
+  if (rows.length) h += '<div class="shdr">매대별</div><div class="chgl">' + rows.join('') + '</div>';
+  $('chg-body').innerHTML = h;
+  openModal('m-changes');
+}
+function gotoChanged() {
+  for (var i = 0; i < P.mds.length; i++) {
+    var os = P.mds[i].items.filter(function (it) { return chgOf(it.o); }).map(function (it) { return it.o; });
+    if (os.length) { closeModal('m-changes'); gotoPog(os); toast('바뀐 칸 ' + os.length + '개를 선택했어요 (' + P.mds[i].name + ')'); return; }
+  }
+  toast('표시할 바뀐 칸이 없어요 (빠진 칸만 있었어요)');
+}
+$('chg-goto').onclick = gotoChanged;
+$('chg-clear').onclick = function () {
+  if (!confirm('변경 표시(하늘색)와 변경 내역을 지울까요? 기입한 값은 그대로예요.')) return;
+  P.changes = null; closeModal('m-changes'); saveNow(); renderAll();
+};
+$('btn-changes').onclick = openChanges;
 
 /* ---------- 엑셀 ---------- */
 function sortedItems(md) {

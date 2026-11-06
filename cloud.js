@@ -79,7 +79,7 @@ async function writeParts(prefix, list, oldCount) {
   await b.commit();
   return parts.length;
 }
-const stateJson = P => JSON.stringify({ edits: P.edits || {}, mdTypes: P.mdTypes || {}, propTypes: P.propTypes || {}, done: P.done || {} });
+const stateJson = P => JSON.stringify({ edits: P.edits || {}, mdTypes: P.mdTypes || {}, propTypes: P.propTypes || {}, done: P.done || {}, changes: P.changes || null });
 async function saveAll(P, fxIds, old) { // 매대·상품 원본까지 통째로 (처음 만들 때·새로 불러올 때)
   const mdParts = await writeParts('md', P.mds, old?.mdParts);
   const prods = Object.values(P.products || {});
@@ -140,7 +140,7 @@ async function openCloud(pogId) {
       const [mds, prods] = await Promise.all([readParts('md', m.mdParts), readParts('pr', m.prodParts)]);
       const st = JSON.parse(m.state || '{}'), products = {};
       prods.forEach(p => { if (p && p.code) products[p.code] = p; });
-      const P = { store: { code: m.storeCode, name: m.storeName }, collectedAt: m.collectedAt, mds, products, edits: st.edits || {}, mdTypes: st.mdTypes || {}, propTypes: st.propTypes || {}, done: st.done || {} };
+      const P = { store: { code: m.storeCode, name: m.storeName }, collectedAt: m.collectedAt, mds, products, edits: st.edits || {}, mdTypes: st.mdTypes || {}, propTypes: st.propTypes || {}, done: st.done || {}, changes: st.changes || null };
       C.prodSig = prodSig(P);
       useP(P);
       setStatus('☁ 서버에서 불러옴');
