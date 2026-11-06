@@ -830,10 +830,15 @@ function ingest(d, msgPrefix) {
   var code = n.store.code || 'unknown';
   if (P && P.store.code === code && P.collectedAt === n.collectedAt) return false;
   var prev = (P && P.store.code === code) ? P : readProject(code);
-  P = { store: n.store, collectedAt: n.collectedAt, mds: n.mds, products: n.products, edits: prev ? prev.edits || {} : {}, mdTypes: prev ? prev.mdTypes || {} : {}, propTypes: prev ? prev.propTypes || {} : {}, done: prev ? prev.done || {} : {} };
+  // 상품 상세정보는 이어서 씀: Global POG에서 새로 불러오면 상품 정보가 비어 있어서, 전에 채운 걸 지우지 않게
+  // (새 데이터에 제대로 된 정보가 있으면 그게 우선)
+  var products = {}, pp = (prev && prev.products) || {};
+  Object.keys(pp).forEach(function (c) { if (pp[c] && !pp[c].error) products[c] = pp[c]; });
+  Object.keys(n.products).forEach(function (c) { var np = n.products[c]; if ((np && !np.error) || !products[c]) products[c] = np; });
+  P = { store: n.store, collectedAt: n.collectedAt, mds: n.mds, products: products, edits: prev ? prev.edits || {} : {}, mdTypes: prev ? prev.mdTypes || {} : {}, propTypes: prev ? prev.propTypes || {} : {}, done: prev ? prev.done || {} : {} };
   var kept = Object.keys(P.edits).length;
   afterLoad();
-  toast((msgPrefix || '') + (n.store.name || code) + ' — 매대 ' + n.mds.length + '개, 상품 ' + Object.keys(n.products).length + '종' + (kept ? ' (이전 수정 ' + kept + '건 유지)' : ''));
+  toast((msgPrefix || '') + (n.store.name || code) + ' — 매대 ' + n.mds.length + '개, 상품 ' + Object.keys(CODE_INDEX).length + '종' + (kept ? ' (이전 수정 ' + kept + '건 유지)' : ''));
   return true;
 }
 function importProject(obj) {
