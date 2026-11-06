@@ -18,13 +18,16 @@ html,body{height:100%}
 body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;color:var(--g9);background:var(--g1);font-size:13px;overflow:hidden}
 button{font-family:inherit;cursor:pointer}
 input,select{font-family:inherit}
-header{--hh:56px;height:56px;background:var(--o);color:#fff;display:flex;align-items:center;gap:14px;padding:0 16px}
+header{min-height:56px;background:var(--o);color:#fff;display:flex;align-items:center;gap:14px;padding:env(safe-area-inset-top) max(16px,env(safe-area-inset-right)) 0 max(16px,env(safe-area-inset-left))}
+header>*{flex-shrink:0}
+.hbrand{min-width:0;flex-shrink:1}
+.hbrand .logo,.hbrand .hsub{overflow:hidden;text-overflow:ellipsis}
 .logo{font-size:16px;font-weight:800;letter-spacing:-.3px;white-space:nowrap}
 .hsub{font-size:11px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hstats{display:flex;gap:6px;flex-wrap:nowrap}
 .hstat{background:rgba(255,255,255,.18);border-radius:14px;padding:3px 10px;font-size:11px;font-weight:700;white-space:nowrap}
 .hstat.warn{background:#fff;color:var(--red)}
-.search{margin-left:auto;width:220px;border:none;border-radius:6px;padding:7px 10px;font-size:12px}
+.search{margin-left:auto;width:220px;min-width:110px;flex-shrink:1;border:none;border-radius:6px;padding:7px 10px;font-size:12px}
 .hbtn{border:1.5px solid rgba(255,255,255,.6);background:rgba(255,255,255,.12);color:#fff;border-radius:6px;padding:6px 11px;font-size:12px;font-weight:700;white-space:nowrap}
 .hbtn:hover{background:rgba(255,255,255,.25)}
 .hbtn.solid{background:#fff;color:var(--o2);border-color:#fff}
@@ -211,9 +214,29 @@ table.xt .unk{color:var(--red);font-weight:700}
 .cloud-sec .shdr{margin-top:0}
 
 /* ---------- 아이패드 · 모바일 ---------- */
-.narrow-only,.sheet-h,.scrim,.touch-only,.touch-help{display:none}
+.narrow-only,.menu-only,.sheet-h,.scrim,.touch-only,.touch-help{display:none}
 .hbtn.ico{padding:6px 10px;font-size:16px;line-height:1}
 .hacts{display:flex;gap:14px}
+body.view-table #btn-side{display:none}
+/* 넓은 화면: ☰로 매대 목록을 접어서 POG 화면을 넓게 */
+@media (min-width:1101px){
+  body.side-hidden .layout{grid-template-columns:1fr 330px}
+  body.side-hidden .side{display:none}
+}
+/* 헤더가 잘리지 않게: 폭이 좁으면 버튼을 ⋯ 메뉴로 (아이패드 가로 포함) */
+@media (max-width:1400px){
+  .menu-only{display:inline-block}
+  header{gap:10px}
+  .save-status{display:none}
+  .hacts{display:none;position:fixed;top:calc(var(--hh) + 4px);right:8px;z-index:3100;flex-direction:column;gap:6px;background:#fff;border-radius:10px;padding:8px;box-shadow:0 8px 28px rgba(0,0,0,.2);min-width:200px}
+  body.menu-open .hacts{display:flex}
+  .hacts .hbtn{background:var(--g1);color:var(--g9);border-color:var(--g1);text-align:left;padding:11px 12px}
+  body.menu-open .scrim{display:block}
+  .scrim{position:fixed;inset:var(--hh) 0 0 0;background:rgba(0,0,0,.3);z-index:2900}
+}
+@media (max-width:1250px){
+  .hstats{display:none}
+}
 @media (pointer:coarse){
   .touch-only{display:inline-block}
   .touch-help{display:block}
@@ -239,22 +262,16 @@ table.xt .unk{color:var(--red);font-weight:700}
   .layout,.layout.tbl{grid-template-columns:1fr 300px}
   .side{position:fixed;left:0;top:var(--hh);bottom:0;width:min(300px,85vw);z-index:3000;transform:translateX(-102%);transition:transform .2s;box-shadow:4px 0 20px rgba(0,0,0,.15)}
   body.side-open .side{transform:none}
-  body.view-table #btn-side{display:none}
-  body.side-open .scrim,body.menu-open .scrim{display:block}
-  .scrim{position:fixed;inset:var(--hh) 0 0 0;background:rgba(0,0,0,.3);z-index:2900}
-  header{gap:8px;padding:0 10px}
-  .hstats,.save-status{display:none}
-  .search{width:170px;margin-left:auto}
-  .hacts{display:none;position:fixed;top:calc(var(--hh) + 4px);right:8px;z-index:3100;flex-direction:column;gap:6px;background:#fff;border-radius:10px;padding:8px;box-shadow:0 8px 28px rgba(0,0,0,.2);min-width:200px}
-  body.menu-open .hacts{display:flex}
-  .hacts .hbtn{background:var(--g1);color:var(--g9);border-color:var(--g1);text-align:left;padding:11px 12px}
+  body.side-open .scrim{display:block}
+  header{gap:8px;padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right))}
+  .search{width:170px}
   .legend{display:none}
   .toolbar{gap:8px;padding:6px 10px}
 }
 /* 휴대폰: 한 줄 화면, 오른쪽 패널은 아래에서 올라오는 시트로 */
-@media (max-width:760px){
+@media (max-width:700px){
   :root{--hh:100px}
-  header{--hh:100px;height:auto;min-height:100px;flex-wrap:wrap;align-content:center;row-gap:6px;padding:6px 10px}
+  header{min-height:100px;flex-wrap:wrap;align-content:center;row-gap:6px;padding-top:calc(6px + env(safe-area-inset-top));padding-bottom:6px}
   .wide-only,.hsub,.save-status{display:none}
   .hbrand{flex:1;min-width:0}
   .logo{font-size:15px}
@@ -292,7 +309,7 @@ table.xt .unk{color:var(--red);font-weight:700}
 <body>
 
 <header>
-  <button class="hbtn ico narrow-only" id="btn-side" title="매대 목록">☰</button>
+  <button class="hbtn ico" id="btn-side" title="매대 목록 접기·펴기">☰</button>
   <div class="hbrand">
     <div class="logo">초도리스트<span class="wide-only"> POG 편집기</span></div>
     <div class="hsub" id="hsub">Artbox Global</div>
@@ -307,7 +324,7 @@ table.xt .unk{color:var(--red);font-weight:700}
     <button class="hbtn" id="btn-settings">설정</button>
     <button class="hbtn" id="btn-export">진행상황 내보내기</button>
   </div>
-  <button class="hbtn ico narrow-only" id="btn-more" title="메뉴">⋯</button>
+  <button class="hbtn ico menu-only" id="btn-more" title="메뉴">⋯</button>
   <button class="hbtn solid" id="btn-final"><span class="wide-only">최종 확인 · </span>엑셀</button>
 </header>
 
@@ -706,7 +723,7 @@ var cur = 0;
 var sel = new Set();
 var zoom = 1, fitMode = 'h';
 var MULTI = false; // 터치 화면용: Ctrl 없이 하나씩 추가·해제
-function isPhone() { return window.matchMedia('(max-width:760px)').matches; }
+function isPhone() { return window.matchMedia('(max-width:700px)').matches; }
 var searchQ = '';
 var LAYOUT = {};
 var ITEM_INDEX = {};
@@ -1819,6 +1836,8 @@ viewport.addEventListener('wheel', function (e) {
   applyZoom();
 }, { passive: false });
 window.addEventListener('resize', function () { if (fitMode && CUR_L && VIEW === 'pog') fit(fitMode); });
+// 매대 목록을 접거나 펴서 POG 화면 폭이 바뀌면 맞춤 배율도 다시 계산
+if (window.ResizeObserver) new ResizeObserver(function () { if (fitMode && CUR_L && VIEW === 'pog') fit(fitMode); }).observe(viewport);
 
 side.addEventListener('click', function (e) {
   var r = e.target.closest('.mdrow');
@@ -1835,7 +1854,15 @@ side.addEventListener('click', function (e) {
   window.addEventListener('resize', setH);
 })();
 function closeDrawers() { document.body.classList.remove('side-open', 'menu-open'); }
-$('btn-side').onclick = function () { document.body.classList.remove('menu-open'); document.body.classList.toggle('side-open'); };
+// 넓은 화면은 매대 목록을 접기·펴기 (기억함), 좁은 화면은 서랍으로 열기
+$('btn-side').onclick = function () {
+  document.body.classList.remove('menu-open');
+  if (window.matchMedia('(min-width:1101px)').matches) {
+    var hid = document.body.classList.toggle('side-hidden');
+    try { localStorage.setItem('pogfl:sideHidden', hid ? '1' : ''); } catch (e) {}
+  } else document.body.classList.toggle('side-open');
+};
+try { if (localStorage.getItem('pogfl:sideHidden')) document.body.classList.add('side-hidden'); } catch (e) {}
 $('btn-more').onclick = function () { document.body.classList.remove('side-open'); document.body.classList.toggle('menu-open'); };
 $('scrim').onclick = closeDrawers;
 $('hacts').addEventListener('click', function () { document.body.classList.remove('menu-open'); });
